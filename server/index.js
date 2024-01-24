@@ -18,6 +18,9 @@ app.use(express.json());
 //ROUTES//
 app.use('/api/users', userRoutes);
 app.use('/api/universities', universityRoutes);
+app.use('/api/rsos', rsosRoutes);
+app.use('/api/events', eventsRoutes);
+//app.use('/api/commentsratings', commentsratingsRoutes);
 
 
 app.listen(PORT, () => {
