@@ -1,37 +1,102 @@
 const express = require('express');
 const router = express.Router();
-const pool = require("../db");
+const pool = require('../db');
 
-// POST route to create a university
-router.post('/create', async (req, res) => {
+// Create a new university
+router.post("/", async (req, res) => {
     try {
         const { name, location, description, number_of_students, pictures } = req.body;
         const newUniversity = await pool.query(
-            "INSERT INTO universities (name, location, description, number_of_students, pictures) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+            "INSERT INTO university (name, location, description, number_of_students, pictures) VALUES ($1, $2, $3, $4, $5) RETURNING *",
             [name, location, description, number_of_students, pictures]
         );
         res.json(newUniversity.rows[0]);
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Server error');
+        res.status(500).json({ message: "Server error" });
     }
 });
 
-//get all universities
-router.get('/all', async (req, res) => {
+// Get all universities
+router.get("/", async (req, res) => {
     try {
-        const allUsers = await pool.query("SELECT * FROM users");
-        res.json(allUsers.rows);
+        const allUniversities = await pool.query("SELECT * FROM university");
+        res.json(allUniversities.rows);
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Server error');
+        res.status(500).json({ message: "Server error" });
     }
-})
+});
 
-//get a university
+// Get a specific university
+router.get("/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const university = await pool.query("SELECT * FROM university WHERE university_id = $1", [id]);
+        res.json(university.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: "Server error" });
+    }
+});
 
-//edit a university
+// Update a university
+router.put("/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, location, description, number_of_students, pictures } = req.body;
+        let updateQuery = "UPDATE university SET ";
+        let updateFields = [];
+        let queryValues = [];
+        let counter = 1;
 
-//delete a university
+        if (name !== undefined) {
+            updateFields.push(`name = $${counter++}`);
+            queryValues.push(name);
+        }
+        if (location !== undefined) {
+            updateFields.push(`location = $${counter++}`);
+            queryValues.push(location);
+        }
+        if (description !== undefined) {
+            updateFields.push(`description = $${counter++}`);
+            queryValues.push(description);
+        }
+        if (number_of_students !== undefined) {
+            updateFields.push(`number_of_students = $${counter++}`);
+            queryValues.push(number_of_students);
+        }
+        if (pictures !== undefined) {
+            updateFields.push(`pictures = $${counter++}`);
+            queryValues.push(pictures);
+        }
+
+        if (queryValues.length > 0) {
+            updateQuery += updateFields.join(", ") + ` WHERE university_id = $${counter}`;
+            queryValues.push(id);
+
+            await pool.query(updateQuery, queryValues);
+            res.json("University was updated");
+        } else {
+            res.json("No fields to update");
+        }
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+// Delete a university
+router.delete("/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        await pool.query("DELETE FROM university WHERE university_id = $1", [id]);
+        res.json("University was deleted");
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: "Server error" });
+    }
+});
 
 module.exports = router;
