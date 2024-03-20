@@ -7,7 +7,7 @@ router.post("/create", async (req, res) => {
     try {
         const { name, location, description, number_of_students, pictures } = req.body;
         const newUniversity = await pool.query(
-            "INSERT INTO university (name, location, description, number_of_students, pictures) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+            "INSERT INTO universities (name, location, description, number_of_students, pictures) VALUES ($1, $2, $3, $4, $5) RETURNING *",
             [name, location, description, number_of_students, pictures]
         );
         res.json(newUniversity.rows[0]);
@@ -20,7 +20,7 @@ router.post("/create", async (req, res) => {
 // Get all universities
 router.get("/all", async (req, res) => {
     try {
-        const allUniversities = await pool.query("SELECT * FROM university");
+        const allUniversities = await pool.query("SELECT * FROM universities");
         res.json(allUniversities.rows);
     } catch (err) {
         console.error(err.message);
@@ -32,7 +32,7 @@ router.get("/all", async (req, res) => {
 router.get("/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        const university = await pool.query("SELECT * FROM university WHERE university_id = $1", [id]);
+        const university = await pool.query("SELECT * FROM universities WHERE university_id = $1", [id]);
         res.json(university.rows[0]);
     } catch (err) {
         console.error(err.message);
@@ -45,7 +45,7 @@ router.put("/update/:id", async (req, res) => {
     try {
         const { id } = req.params;
         const { name, location, description, number_of_students, pictures } = req.body;
-        let updateQuery = "UPDATE university SET ";
+        let updateQuery = "UPDATE universities SET ";
         let updateFields = [];
         let queryValues = [];
         let counter = 1;
@@ -91,7 +91,7 @@ router.put("/update/:id", async (req, res) => {
 router.delete("/delete/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        await pool.query("DELETE FROM university WHERE university_id = $1", [id]);
+        await pool.query("DELETE FROM universities WHERE university_id = $1", [id]);
         res.json("University was deleted");
     } catch (err) {
         console.error(err.message);
