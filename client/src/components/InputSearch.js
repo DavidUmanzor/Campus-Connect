@@ -41,6 +41,14 @@ const InputSearch = () => {
                   </p>
                 </div>
               </div>
+              <div className="search-result-box">
+                <div className="result-content">
+                  <p className="content-description">
+                    Import content from database
+                  </p>
+                  <div className="content-title">Title</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

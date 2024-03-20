@@ -41,8 +41,8 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// Edit a user
-router.put("/edit/:id", async (req, res) => {
+// Update a user
+router.put("/update/:id", async (req, res) => {
     try {
         const { id } = req.params; // The user's ID
         const { name, email, password, role, university_id } = req.body; // Data from the request body
@@ -77,7 +77,7 @@ router.put("/edit/:id", async (req, res) => {
 });
 
 // Delete a user
-router.delete('/:id', async (req, res) => {
+router.delete('/delete/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const deleteUser = await pool.query("DELETE FROM users WHERE user_id = $1 RETURNING *", [id]);

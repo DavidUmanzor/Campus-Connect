@@ -1,8 +1,9 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const cors = require("cors");
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.SERVER_PORT || 5000;
 
 // Import route handlers
 const userRoutes = require('./routes/user');
@@ -20,7 +21,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/universities', universityRoutes);
 app.use('/api/rsos', rsosRoutes);
 app.use('/api/events', eventsRoutes);
-//app.use('/api/commentsratings', commentsratingsRoutes);
+app.use('/api/commentsratings', commentsratingsRoutes);
 
 
 app.listen(PORT, () => {

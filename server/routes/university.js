@@ -3,7 +3,7 @@ const router = express.Router();
 const pool = require('../db');
 
 // Create a new university
-router.post("/", async (req, res) => {
+router.post("/create", async (req, res) => {
     try {
         const { name, location, description, number_of_students, pictures } = req.body;
         const newUniversity = await pool.query(
@@ -18,7 +18,7 @@ router.post("/", async (req, res) => {
 });
 
 // Get all universities
-router.get("/", async (req, res) => {
+router.get("/all", async (req, res) => {
     try {
         const allUniversities = await pool.query("SELECT * FROM university");
         res.json(allUniversities.rows);
@@ -41,7 +41,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // Update a university
-router.put("/:id", async (req, res) => {
+router.put("/update/:id", async (req, res) => {
     try {
         const { id } = req.params;
         const { name, location, description, number_of_students, pictures } = req.body;
@@ -88,7 +88,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // Delete a university
-router.delete("/:id", async (req, res) => {
+router.delete("/delete/:id", async (req, res) => {
     try {
         const { id } = req.params;
         await pool.query("DELETE FROM university WHERE university_id = $1", [id]);

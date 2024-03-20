@@ -1,0 +1,97 @@
+.window {
+	background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+	--bs-gutter-x: 0;
+
+	align-items: center;
+	padding: 0;
+}
+
+.image-display {
+	width: 100vw;
+	height: 70vh;
+	overflow-y: hidden;
+	padding-right: 0;
+	padding-left: 0;
+	--bs-gutter-x: 0;
+}
+
+.image-display row {
+	--bs-gutter-x: 0;
+}
+
+.image-display page-name {
+	justify-content: left;
+	top: auto;
+}
+
+.image-display image-caption {
+	justify-content: center;
+	bottom: 0%;
+}
+
+.dashboard-image {
+	width: 100%;
+	height: auto;
+	object-fit: cover;
+}
+
+.page-name {
+	position: absolute;
+	top: 5%;
+	left: 5%;
+	font-size: 3em;
+	color: white;
+	font-weight: bold;
+}
+
+.image-caption {
+	position: absolute;
+	bottom: 35%;
+	left: 10%;
+	font-size: 1.5em;
+	color: white;
+}
+
+.content-seperator {
+	background-color: #202030;
+	height: 3vh;
+	width: 100%;
+}
+
+.content-display {
+	background-color: #ffffff;
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	padding: 2em 0;
+}
+
+.sign-up {
+	margin-top: 1em;
+	text-align: center;
+}
+
+.sign-up button {
+	background-color: black;
+	color: white;
+	padding: 15px 30px;
+	border-radius: 30px;
+	font-size: 1.2em;
+	cursor: pointer;
+	border: none;
+	transition: background-color 0.3s ease;
+}
+
+.sign-up button:hover {
+	background-color: #333;
+}
+
+.content-text {
+	text-align: center;
+	font-size: 1.2em;
+	margin-top: 1em;
+}

@@ -3,7 +3,7 @@ const router = express.Router();
 const db = require('../db');
 
 // Create a new comment rating
-router.post('/commentsRatings', async (req, res) => {
+router.post('/create', async (req, res) => {
     const { user_id, event_id, text, rating } = req.body;
     try {
         const newCommentRating = await db.query(
@@ -17,7 +17,7 @@ router.post('/commentsRatings', async (req, res) => {
 });
 
 // Get all comment ratings
-router.get('/commentsRatings', async (req, res) => {
+router.get('/all', async (req, res) => {
     try {
         const allCommentsRatings = await db.query('SELECT * FROM commentsratings');
         res.json(allCommentsRatings.rows);
@@ -27,7 +27,7 @@ router.get('/commentsRatings', async (req, res) => {
 });
 
 // Get a specific comment rating
-router.get('/commentsRatings/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
     const { id } = req.params;
     try {
         const commentRating = await db.query(
@@ -41,7 +41,7 @@ router.get('/commentsRatings/:id', async (req, res) => {
 });
 
 // Update a comment rating
-router.put('/commentsRatings/:id', async (req, res) => {
+router.put('/update/:id', async (req, res) => {
     const { id } = req.params;
     const { user_id, event_id, text, rating } = req.body;
     try {
@@ -56,7 +56,7 @@ router.put('/commentsRatings/:id', async (req, res) => {
 });
 
 // Delete a comment rating
-router.delete('/commentsRatings/:id', async (req, res) => {
+router.delete('/delete/:id', async (req, res) => {
     const { id } = req.params;
     try {
         await db.query('DELETE FROM commentsratings WHERE comment_id = $1', [id]);
