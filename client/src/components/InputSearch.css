@@ -1,0 +1,51 @@
+.search-results {
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+}
+
+.search-results .div {
+    background-color: #ffffff;
+    height: 1024px;
+    overflow: hidden;
+    position: relative;
+    width: 1440px;
+  }
+  
+  .search-results .group {
+    height: 85px;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 1440px;
+  }
+  
+  .search-results .overlap-group {
+    background-color: #201f2f;
+    height: 85px;
+    position: relative;
+    width: 1440px;
+  }
+  
+  .search-results .text-wrapper {
+    color: #ffffff;
+    font-family: "Inter", Helvetica;
+    font-size: 35px;
+    font-weight: 900;
+    left: 41px;
+    letter-spacing: 0;
+    line-height: normal;
+    position: absolute;
+    top: 21px;
+    white-space: nowrap;
+    width: 331px;
+  }
+  
+  .search-results .text-wrapper-2 {
+    color: #ffffff;
+    font-family: "Inter", Helvetica;
+    font-size: 25px;
+    /* Additional styles assumed to be continued */
+  }

@@ -3,7 +3,7 @@ const router = express.Router();
 const pool = require('../db'); // Assuming you have a db.js file for PostgreSQL pool
 
 // CREATE Event
-router.post('/', async (req, res) => {
+router.post('/create', async (req, res) => {
     try {
         const { name, category, description, event_time, event_date, location, contact_phone, contact_email, visibility, created_by, university_id } = req.body;
         const newEvent = await pool.query(
@@ -17,7 +17,7 @@ router.post('/', async (req, res) => {
 });
 
 // READ all Events
-router.get('/', async (req, res) => {
+router.get('/all', async (req, res) => {
     try {
         const allEvents = await pool.query("SELECT * FROM event");
         res.json(allEvents.rows);
@@ -38,7 +38,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // UPDATE Event
-router.put('/:id', async (req, res) => {
+router.put('/update/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const { name, category, description, event_time, event_date, location, contact_phone, contact_email, visibility, created_by, university_id } = req.body;
@@ -53,7 +53,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE Event
-router.delete('/:id', async (req, res) => {
+router.delete('/delete/:id', async (req, res) => {
     try {
         const { id } = req.params;
         await pool.query("DELETE FROM event WHERE event_id = $1", [id]);

@@ -17,7 +17,7 @@ router.post('/create', async (req, res) => {
 });
 
 // Get all RSOs
-router.get('/', async (req, res) => {
+router.get('/all', async (req, res) => {
     try {
         const allRsos = await pool.query('SELECT * FROM rso');
         res.json(allRsos.rows);
