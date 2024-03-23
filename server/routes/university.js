@@ -28,6 +28,23 @@ router.get("/all", async (req, res) => {
     }
 });
 
+
+// Search universities by name or description
+router.get("/search", async (req, res) => {
+    try {
+        const { query } = req.query; // Get the search query from query parameters
+        const searchQuery = `%${query}%`; // Prepare the search query for a partial match
+        const searchResults = await pool.query(
+            "SELECT * FROM universities WHERE name ILIKE $1 OR description ILIKE $1",
+            [searchQuery]
+        );
+        res.json(searchResults.rows);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
 // Get a specific university
 router.get("/:id", async (req, res) => {
     try {
