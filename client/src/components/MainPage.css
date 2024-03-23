@@ -1,1 +1,44 @@
 /* MainPage.css */
+
+/* MainPage.css */
+.main-page-container {
+    padding: 0;
+    margin: 0;
+  }
+  
+  .main-navbar {
+    margin-bottom: 20px;
+  }
+  
+  .search-row {
+    margin-bottom: 20px;
+  }
+  
+  .search-col {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .search-input {
+    flex-grow: 1;
+    margin-right: 10px;
+  }
+  
+  .image-row {
+    position: relative;
+    text-align: center;
+  }
+  
+  .campus-image {
+    width: 100%;
+    height: auto; /* Adjust as necessary */
+  }
+  
+  .image-caption {
+    position: absolute;
+    top: 50%; /* Adjust as necessary */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff; /* Or any color you want */
+    font-size: 2em; /* Adjust as necessary */
+  }  

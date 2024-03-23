@@ -26,11 +26,27 @@ router.get('/all', async (req, res) => {
     }
 });
 
+// Search events by name or description
+router.get("/search", async (req, res) => {
+    try {
+        const { query } = req.query; // Get the search query from query parameters
+        const searchQuery = `%${query}%`; // Prepare the search query for a partial match
+        const searchResults = await pool.query(
+            "SELECT * FROM Events WHERE name ILIKE $1 OR description ILIKE $1",
+            [searchQuery]
+        );
+        res.json(searchResults.rows);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
 // READ a single Event
 router.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const event = await pool.query("SELECT * FROM event WHERE event_id = $1", [id]);
+        const event = await pool.query("SELECT * FROM events WHERE event_id = $1", [id]);
         res.json(event.rows[0]);
     } catch (err) {
         console.error(err.message);
