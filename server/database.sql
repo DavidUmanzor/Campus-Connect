@@ -58,3 +58,11 @@ CREATE TABLE CommentsRatings (
   FOREIGN KEY (user_id) REFERENCES Users(user_id),
   FOREIGN KEY (event_id) REFERENCES Events(event_id)
 );
+
+CREATE TABLE User_RSOs (
+  user_id INT,
+  rso_id INT,
+  PRIMARY KEY (user_id, rso_id),
+  FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+  FOREIGN KEY (rso_id) REFERENCES RSOs(rso_id) ON DELETE CASCADE
+);

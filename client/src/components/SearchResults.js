@@ -1,8 +1,8 @@
 // SearchResults.js
 
 import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Container, Row, Col, InputGroup, FormControl, Button, Card } from 'react-bootstrap';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { Nav,  Navbar, Container, Row, Col, InputGroup, FormControl, Button, Card } from 'react-bootstrap';
 import './SearchResults.css'; // Ensure this CSS file exists and contains the styles you want
 
 const fetchData = async (query) => {
@@ -69,80 +69,103 @@ const SearchResults = () => {
         handleSearch();
       }
     };
+
+    const handleLogout = () => {
+        localStorage.removeItem('userId'); // Removes userId from localStorage
+        navigate('/'); // Navigates to home page
+    };
   
     return (
-      <Container fluid>
-        <Row className="my-4">
-          <Col xs={12} md={8} lg={6} className="mx-auto">
-            <InputGroup>
-              <FormControl
-                placeholder="Search for events, universities, RSOs..."
-                value={searchQuery}
-                onChange={handleSearchInputChange}
-                onKeyPress={handleKeyPress}
-              />
-              <Button variant="outline-primary" onClick={handleSearch}>Search</Button>
-            </InputGroup>
-          </Col>
-        </Row>
-        {/* Render Universities */}
-        <Row>
-          <Col>
-            <h3>Universities</h3>
-            {results.universities.length > 0 ? (
-              results.universities.map((university) => (
-                <Card key={university.university_id} className="mb-3">
-                  <Card.Body>
-                    <Card.Title>{university.name}</Card.Title>
-                    <Card.Text>{university.description}</Card.Text>
-                    {/* Add more university details here */}
-                  </Card.Body>
-                </Card>
-              ))
-            ) : (
-              <p>No universities found matching your search.</p>
-            )}
-          </Col>
-        </Row>
-        {/* Render RSOs */}
-        <Row>
-          <Col>
-            <h3>Registered Student Organizations (RSOs)</h3>
-            {results.rsos.length > 0 ? (
-              results.rsos.map((rso) => (
-                <Card key={rso.rso_id} className="mb-3">
-                  <Card.Body>
-                    <Card.Title>{rso.name}</Card.Title>
-                    <Card.Text>{rso.description}</Card.Text>
-                    {/* Add more RSO details here */}
-                  </Card.Body>
-                </Card>
-              ))
-            ) : (
-              <p>No RSOs found matching your search.</p>
-            )}
-          </Col>
-        </Row>
-        {/* Render Events */}
-        <Row>
-          <Col>
-            <h3>Events</h3>
-            {results.events.length > 0 ? (
-              results.events.map((event) => (
-                <Card key={event.event_id} className="mb-3">
-                  <Card.Body>
-                    <Card.Title>{event.name}</Card.Title>
-                    <Card.Text>{event.description}</Card.Text>
-                    {/* Add more event details here */}
-                  </Card.Body>
-                </Card>
-              ))
-            ) : (
-              <p>No events found matching your search.</p>
-            )}
-          </Col>
-        </Row>
-      </Container>
+        <div className="search-results-page">
+            <Navbar bg="light" expand="lg" className="main-navbar">
+                <Container fluid>
+                    <Navbar.Brand href="/">Campus Connect</Navbar.Brand>
+                    <Navbar.Toggle />
+                    <Navbar.Collapse className="justify-content-end">
+                    <Nav>
+                        <Button variant="outline-primary" onClick={() => navigate('/user')}>User Profile</Button> {/* Adjust the path as necessary */}
+                        <Button variant="danger" onClick={handleLogout}>Log Out</Button>
+                    </Nav>
+                    </Navbar.Collapse>
+                </Container>
+            </Navbar>
+            <Container fluid className="mt-4">
+                <Row className="justify-content-md-center">
+                    <Col xs={12} md={8} lg={6}>
+                        <InputGroup>
+                            <FormControl
+                                placeholder="Search for events, universities, RSOs..."
+                                aria-label="Search"
+                                value={searchQuery}
+                                onChange={handleSearchInputChange}
+                                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                            />
+                            <Button variant="outline-primary" onClick={handleSearch}>Search</Button>
+                        </InputGroup>
+                    </Col>
+                </Row>
+                {/* Render sections for universities, rsos, and events */}
+                {/* Example for universities */}
+                <Row className="mt-4">
+                    <Col>
+                        <h3>Universities</h3>
+                        {results.universities.length > 0 ? (
+                            results.universities.map((university) => (
+                                <Link to={`/university/${university.id}`} key={university.id} className="text-decoration-none">
+                                    <Card className="mb-3">
+                                        <Card.Body>
+                                            <Card.Title>{university.name}</Card.Title>
+                                            <Card.Text>{university.description}</Card.Text>
+                                            {/* Add more university details here */}
+                                        </Card.Body>
+                                    </Card>
+                                </Link>
+                            ))
+                        ) : (
+                            <p>No universities found matching your search.</p>
+                        )}
+                    </Col>
+                </Row>
+                {/* Render RSOs */}
+                <Row>
+                <Col>
+                    <h3>Registered Student Organizations (RSOs)</h3>
+                    {results.rsos.length > 0 ? (
+                    results.rsos.map((rso) => (
+                        <Card key={rso.rso_id} className="mb-3">
+                        <Card.Body>
+                            <Card.Title>{rso.name}</Card.Title>
+                            <Card.Text>{rso.description}</Card.Text>
+                            {/* Add more RSO details here */}
+                        </Card.Body>
+                        </Card>
+                    ))
+                    ) : (
+                    <p>No RSOs found matching your search.</p>
+                    )}
+                </Col>
+                </Row>
+                {/* Render Events */}
+                <Row>
+                <Col>
+                    <h3>Events</h3>
+                    {results.events.length > 0 ? (
+                    results.events.map((event) => (
+                        <Card key={event.event_id} className="mb-3">
+                        <Card.Body>
+                            <Card.Title>{event.name}</Card.Title>
+                            <Card.Text>{event.description}</Card.Text>
+                            {/* Add more event details here */}
+                        </Card.Body>
+                        </Card>
+                    ))
+                    ) : (
+                    <p>No events found matching your search.</p>
+                    )}
+                </Col>
+                </Row>
+            </Container>
+        </div>
     );
   };
   

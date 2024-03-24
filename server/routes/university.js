@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 
+// Creation Actions
+
 // Create a new university
 router.post("/create", async (req, res) => {
     try {
@@ -17,45 +19,7 @@ router.post("/create", async (req, res) => {
     }
 });
 
-// Get all universities
-router.get("/all", async (req, res) => {
-    try {
-        const allUniversities = await pool.query("SELECT * FROM universities");
-        res.json(allUniversities.rows);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: "Server error" });
-    }
-});
-
-
-// Search universities by name or description
-router.get("/search", async (req, res) => {
-    try {
-        const { query } = req.query; // Get the search query from query parameters
-        const searchQuery = `%${query}%`; // Prepare the search query for a partial match
-        const searchResults = await pool.query(
-            "SELECT * FROM universities WHERE name ILIKE $1 OR description ILIKE $1",
-            [searchQuery]
-        );
-        res.json(searchResults.rows);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: "Server error" });
-    }
-});
-
-// Get a specific university
-router.get("/:id", async (req, res) => {
-    try {
-        const { id } = req.params;
-        const university = await pool.query("SELECT * FROM universities WHERE university_id = $1", [id]);
-        res.json(university.rows[0]);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: "Server error" });
-    }
-});
+// Edit Actions
 
 // Update a university
 router.put("/update/:id", async (req, res) => {
@@ -103,6 +67,49 @@ router.put("/update/:id", async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 });
+
+// Get Information Actions
+
+// Get all universities
+router.get("/all", async (req, res) => {
+    try {
+        const allUniversities = await pool.query("SELECT * FROM universities");
+        res.json(allUniversities.rows);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+// Search universities by name or description
+router.get("/search", async (req, res) => {
+    try {
+        const { query } = req.query; // Get the search query from query parameters
+        const searchQuery = `%${query}%`; // Prepare the search query for a partial match
+        const searchResults = await pool.query(
+            "SELECT * FROM universities WHERE name ILIKE $1 OR description ILIKE $1",
+            [searchQuery]
+        );
+        res.json(searchResults.rows);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+// Get a specific university
+router.get("/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const university = await pool.query("SELECT * FROM universities WHERE university_id = $1", [id]);
+        res.json(university.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+// Deletion Actions
 
 // Delete a university
 router.delete("/delete/:id", async (req, res) => {

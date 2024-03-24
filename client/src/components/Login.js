@@ -1,3 +1,5 @@
+// Login.js
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
@@ -5,36 +7,42 @@ import './Login.css';
 const Login = ({ onSignUpClick, onClose }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const navigate = useNavigate(); // useNavigate instead of useHistory
+  const navigate = useNavigate();
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      // Here you would replace '/login' with your server endpoint for the login
-      const response = await fetch(`${API_URL}/api/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+        const response = await fetch(`${API_URL}/api/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password }),
+        });
 
-      const responseData = await response.json();
-      
-      if (response.ok) {
-        // Assuming the server responds with the user data on successful login
-        // Navigate to MainPage on successful login
-        navigate('/mainpage');
-      } else {
-        // If login is not successful, handle it here
-        // You could set an error message in your state and display it to the user
-        console.error(responseData.message); // Log or display error message from server
-      }
+        const responseData = await response.json();
+
+        if (response.ok) {
+            // Check if the responseData actually contains the userId
+            if (responseData.user_id !== undefined) {
+                // Store the user ID in localStorage
+                localStorage.setItem('userId', responseData.user_id.toString());
+
+                // Navigate to MainPage on successful login
+                navigate('/mainpage');
+            } else {
+                // Log or handle the case where user_id is not part of the response
+                console.error("User ID not found in response");
+            }
+        } else {
+            // If login is not successful, handle it here
+            console.error(responseData.message); // Display or log error message from server
+        }
     } catch (error) {
-      console.error(error);
+      console.error(error); // Display or log the error
     }
-  };
+};
 
   return (
     <div className="login-overlay">

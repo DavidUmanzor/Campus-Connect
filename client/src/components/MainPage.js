@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col, InputGroup, FormControl, Button, Navbar } from 'react-bootstrap';
+import { Container, Row, Col, InputGroup, FormControl, Button, Navbar, Nav } from 'react-bootstrap';
 import './MainPage.css'; // Ensure your CSS file is correctly linked
 import campusImage from '../images/university-campus-1.jpg'; // Update with the correct path to your image
 
@@ -14,14 +14,22 @@ const MainPage = () => {
     navigate(`/searchresults?query=${encodeURIComponent(searchTerm)}`);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('userId'); // Removes userId from localStorage
+    navigate('/'); // Navigates to home page
+  };
+
   return (
     <div className="main-page">
       <Navbar bg="light" expand="lg" className="main-navbar">
         <Container fluid>
-          <Navbar.Brand href="#">Campus Connect</Navbar.Brand>
+          <Navbar.Brand href="/">Campus Connect</Navbar.Brand>
           <Navbar.Toggle />
           <Navbar.Collapse className="justify-content-end">
-            <Button variant="outline-primary">Menu</Button>
+            <Nav>
+              <Button variant="outline-primary" onClick={() => navigate('/user')}>User Profile</Button> {/* Adjust the path as necessary */}
+              <Button variant="danger" onClick={handleLogout}>Log Out</Button>
+            </Nav>
           </Navbar.Collapse>
         </Container>
       </Navbar>
