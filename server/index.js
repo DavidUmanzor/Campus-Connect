@@ -13,6 +13,7 @@ const eventsRoutes = require('./routes/event');
 const commentsratingsRoutes = require('./routes/commentsratings');
 const loginRoutes = require('./routes/login');
 const userRsoRoutes = require('./routes/userRso');
+const signUpRoutes = require('./routes/signup')
 
 //middleware
 app.use(cors());
@@ -26,6 +27,7 @@ app.use('/api/events', eventsRoutes);
 app.use('/api/commentsratings', commentsratingsRoutes);
 app.use('/api/login', loginRoutes);
 app.use('/api/userRsos', userRsoRoutes);
+app.use('/api/signUp')
 
 
 app.listen(PORT, () => {

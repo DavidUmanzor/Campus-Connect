@@ -17,6 +17,7 @@ CREATE TABLE Universities (
   description TEXT,
   number_of_students INT,
   pictures TEXT[] -- Array of image URLs
+  email_domain VARCHAR(255) UNIQUE;
 );
 
 CREATE TABLE RSOs (

@@ -11,6 +11,10 @@ const SignUp = ({ onLoginClick, onClose }) => {
   const [errors, setErrors] = useState({});
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
+  const isValidEduEmail = (email) => {
+    return email.match(/^[^@]+@[^@]+\.[^@]+$/) && email.endsWith('.edu');
+  };
+
   const validateForm = () => {
     let formIsValid = true;
     let errors = {};
@@ -40,12 +44,17 @@ const SignUp = ({ onLoginClick, onClose }) => {
   };
 
   const handleSignUp = async () => {
-    if (!validateForm()) {
+    if (!name || !email || !password) {
+      alert('Please fill out all fields.');
+      return;
+    }
+    if (!isValidEduEmail(email)) {
+      alert('Please use a valid .edu email address.');
       return;
     }
 
     try {
-      const response = await fetch(`${API_URL}/users/create`, {
+      const response = await fetch(`${API_URL}/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

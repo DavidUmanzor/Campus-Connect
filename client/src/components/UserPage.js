@@ -84,7 +84,7 @@ const UserPage = () => {
                                     <Card.Title>{user.name}</Card.Title>
                                     <Card.Text>Email: {user.email}</Card.Text>
                                     <Card.Text>Role: {user.role}</Card.Text>
-                                    {/* University name can be added here if available */}
+                                    <Card.Text>University: {user.university_id}</Card.Text>
                                 </Card.Body>
                             </Card>
                         ) : <p>Loading user information...</p>}
