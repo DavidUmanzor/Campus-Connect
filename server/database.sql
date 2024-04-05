@@ -38,15 +38,15 @@ CREATE TABLE Events (
   event_time TIME,
   event_date DATE,
   location_name VARCHAR(255),
-  latitude DOUBLE PRECISION,
-  longitude DOUBLE PRECISION,
   contact_phone VARCHAR(20),
   contact_email VARCHAR(255),
   visibility VARCHAR(50) CHECK (visibility IN ('public', 'private', 'rso')),
   created_by INT,
   university_id INT,
+  rso_id INT,
   FOREIGN KEY (created_by) REFERENCES Users(user_id),
-  FOREIGN KEY (university_id) REFERENCES Universities(university_id)
+  FOREIGN KEY (university_id) REFERENCES Universities(university_id),
+  FOREIGN KEY (rso_id) REFERENCES RSOs(rso_id)
 );
 
 CREATE TABLE CommentsRatings (

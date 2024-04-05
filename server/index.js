@@ -27,7 +27,7 @@ app.use('/api/events', eventsRoutes);
 app.use('/api/commentsratings', commentsratingsRoutes);
 app.use('/api/login', loginRoutes);
 app.use('/api/userRsos', userRsoRoutes);
-app.use('/api/signUp')
+app.use('/api/signUp', signUpRoutes)
 
 
 app.listen(PORT, () => {

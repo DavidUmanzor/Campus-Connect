@@ -62,4 +62,28 @@ router.get('/rso/:rsoId', async (req, res) => {
     }
 });
 
+// Assuming you have express and your database pool configured
+router.post('/checkMembership', async (req, res) => {
+    const { userId, rsoId } = req.body;
+
+    try {
+        const result = await pool.query(
+            'SELECT 1 FROM User_RSOs WHERE user_id = $1 AND rso_id = $2',
+            [userId, rsoId]
+        );
+
+        if (result.rows.length > 0) {
+            // User is a member of the RSO
+            res.json({ isMember: true });
+        } else {
+            // User is not a member of the RSO
+            res.json({ isMember: false });
+        }
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+
 module.exports = router;

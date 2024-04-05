@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, InputGroup, FormControl, Button, Navbar, Nav } from 'react-bootstrap';
 import './MainPage.css'; // Ensure your CSS file is correctly linked
 import campusImage from '../images/university-campus-1.jpg'; // Update with the correct path to your image
+import Navigation from './Navigation';
 
 const MainPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -21,18 +22,7 @@ const MainPage = () => {
 
   return (
     <div className="main-page">
-      <Navbar bg="light" expand="lg" className="main-navbar">
-        <Container fluid>
-          <Navbar.Brand href="/">Campus Connect</Navbar.Brand>
-          <Navbar.Toggle />
-          <Navbar.Collapse className="justify-content-end">
-            <Nav>
-              <Button variant="outline-primary" onClick={() => navigate('/user')}>User Profile</Button> {/* Adjust the path as necessary */}
-              <Button variant="danger" onClick={handleLogout}>Log Out</Button>
-            </Nav>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
+      <Navigation />
       <div className="search-container">
         <InputGroup className="search-input-group">
           <FormControl

@@ -7,7 +7,7 @@ router.post('/create', async (req, res) => {
     const { name, description, admin_id, university_id } = req.body;
     try {
         const newRso = await pool.query(
-            'INSERT INTO rso (name, description, admin_id, university_id) VALUES ($1, $2, $3, $4) RETURNING *',
+            'INSERT INTO rsos (name, description, admin_id, university_id) VALUES ($1, $2, $3, $4) RETURNING *',
             [name, description, admin_id, university_id]
         );
         res.json(newRso.rows[0]);
@@ -19,7 +19,7 @@ router.post('/create', async (req, res) => {
 // Get all RSOs
 router.get('/all', async (req, res) => {
     try {
-        const allRsos = await pool.query('SELECT * FROM rso');
+        const allRsos = await pool.query('SELECT * FROM rsos');
         res.json(allRsos.rows);
     } catch (err) {
         console.error(err.message);
@@ -46,10 +46,25 @@ router.get("/search", async (req, res) => {
 router.get('/:id', async (req, res) => {
     const { id } = req.params;
     try {
-        const rso = await pool.query('SELECT * FROM rso WHERE rso_id = $1', [id]);
+        const rso = await pool.query('SELECT * FROM rsos WHERE rso_id = $1', [id]);
         res.json(rso.rows[0]);
     } catch (err) {
         console.error(err.message);
+    }
+});
+
+// Get all RSOs for a specific university
+router.get('/university/:universityId', async (req, res) => {
+    const { universityId } = req.params;
+    try {
+        const rsos = await pool.query(
+            'SELECT * FROM rsos WHERE university_id = $1',
+            [universityId]
+        );
+        res.json(rsos.rows);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: "Server error" });
     }
 });
 

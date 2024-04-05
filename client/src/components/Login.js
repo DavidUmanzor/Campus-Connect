@@ -7,11 +7,13 @@ import './Login.css';
 const Login = ({ onSignUpClick, onClose }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState(''); // Add this line
   const navigate = useNavigate();
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setErrorMessage(''); // Reset error message
     try {
         const response = await fetch(`${API_URL}/api/login`, {
             method: 'POST',
@@ -24,31 +26,28 @@ const Login = ({ onSignUpClick, onClose }) => {
         const responseData = await response.json();
 
         if (response.ok) {
-            // Check if the responseData actually contains the userId
             if (responseData.user_id !== undefined) {
-                // Store the user ID in localStorage
                 localStorage.setItem('userId', responseData.user_id.toString());
-
-                // Navigate to MainPage on successful login
                 navigate('/mainpage');
             } else {
-                // Log or handle the case where user_id is not part of the response
-                console.error("User ID not found in response");
+                setErrorMessage("User ID not found in response"); // Handle no user_id found
             }
         } else {
-            // If login is not successful, handle it here
-            console.error(responseData.message); // Display or log error message from server
+            // If login is not successful, display the error message
+            setErrorMessage(responseData.message || 'Login failed. Please try again.'); // Update here to display message
         }
     } catch (error) {
-      console.error(error); // Display or log the error
+      console.error(error);
+      setErrorMessage('An unexpected error occurred. Please try again.'); // Handle unexpected error
     }
-};
+  };
 
   return (
     <div className="login-overlay">
       <div className="login-panel">
         <button className="close-button" onClick={onClose}>X</button>
         <h2>Login</h2>
+        {errorMessage && <div className="error-message">{errorMessage}</div>} {/* Display the error message here */}
         <form onSubmit={handleLogin}>
           <input 
             type="text"

@@ -28,14 +28,13 @@ router.put("/update/:id", async (req, res) => {
         const { id } = req.params; // The user's ID
         const { name, email, password, role, university_id } = req.body; // Data from the request body
 
-        // Retrieve the current user details
-        const user = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
+        // Corrected: Use "user_id" instead of "id" in the WHERE clause
+        const user = await pool.query("SELECT * FROM users WHERE user_id = $1", [id]);
 
         if (user.rows.length === 0) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        // Set up an object to hold the updated data
         const updatedUser = {
             name: name || user.rows[0].name,
             email: email || user.rows[0].email,
@@ -44,9 +43,9 @@ router.put("/update/:id", async (req, res) => {
             university_id: university_id || user.rows[0].university_id
         };
 
-        // Update the user details, skipping any fields that are null or empty
+        // Corrected: Use "user_id" instead of "id" in the WHERE clause
         const updatedUserResult = await pool.query(
-            "UPDATE users SET name = $1, email = $2, password = $3, role = $4, university_id = $5 WHERE id = $6 RETURNING *",
+            "UPDATE users SET name = $1, email = $2, password = $3, role = $4, university_id = $5 WHERE user_id = $6 RETURNING *",
             [updatedUser.name, updatedUser.email, updatedUser.password, updatedUser.role, updatedUser.university_id, id]
         );
 
