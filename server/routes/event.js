@@ -69,19 +69,29 @@ router.get('/rso/:rsoId', async (req, res) => {
 });
 
 
-// Search events by name or description
+// Enhanced search to consider event visibility and user membership in RSOs
 router.get("/search", async (req, res) => {
+    const { query, userId } = req.query; // Expect userId to be passed as a query parameter
+
     try {
-        const { query } = req.query; // Get the search query from query parameters
-        const searchQuery = `%${query}%`; // Prepare the search query for a partial match
-        const searchResults = await pool.query(
-            "SELECT * FROM events WHERE name ILIKE $1 OR description ILIKE $1",
-            [searchQuery]
-        );
-        res.json(searchResults.rows);
+        // This SQL is hypothetical and needs to be adjusted based on your actual database schema.
+        // It assumes there is a way to check if a user is a member of the RSO (via a JOIN on User_RSOs for example).
+        const sql = `
+            SELECT e.* FROM events e
+            LEFT JOIN User_RSOs ur ON e.rso_id = ur.rso_id AND ur.user_id = $2
+            WHERE (e.name ILIKE $1 OR e.description ILIKE $1)
+            AND (
+                e.visibility = 'public' OR 
+                (e.visibility = 'rso' AND ur.user_id IS NOT NULL)
+            )`;
+        
+        const searchQuery = `%${query}%`;
+        const events = await pool.query(sql, [searchQuery, userId]);
+
+        res.json(events.rows);
     } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: "Server error" });
+        console.error("Error searching events: ", err);
+        res.status(500).json({ message: "Server error", details: err.message });
     }
 });
 
