@@ -5,13 +5,17 @@ const bcrypt = require('bcrypt');
 
 // Add a user to an RSO
 router.post('/add', async (req, res) => {
-    const { user_id, rso_id } = req.body;
+    const { userId, rsoId } = req.body;
     try {
         const newUserRso = await pool.query(
-            'INSERT INTO User_RSOs (user_id, rso_id) VALUES ($1, $2) RETURNING *',
-            [user_id, rso_id]
+            'INSERT INTO User_RSOs (user_id, rso_id) VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING *',
+            [userId, rsoId]
         );
-        res.json(newUserRso.rows[0]);
+        if (newUserRso.rows.length > 0) {
+            res.json({ message: "User added to RSO successfully.", newUserRso: newUserRso.rows[0] });
+        } else {
+            res.status(400).json({ message: "User already a member or invalid IDs." });
+        }
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ message: "Server error" });
@@ -20,13 +24,36 @@ router.post('/add', async (req, res) => {
 
 // Remove a user from an RSO
 router.delete('/remove', async (req, res) => {
-    const { user_id, rso_id } = req.body;
+    const { userId, rsoId } = req.body;
     try {
-        await pool.query(
-            'DELETE FROM User_RSOs WHERE user_id = $1 AND rso_id = $2',
-            [user_id, rso_id]
+        const deleteUserRso = await pool.query(
+            'DELETE FROM User_RSOs WHERE user_id = $1 AND rso_id = $2 RETURNING *',
+            [userId, rsoId]
         );
-        res.json({ message: "User removed from RSO successfully." });
+        if (deleteUserRso.rows.length > 0) {
+            res.json({ message: "User removed from RSO successfully." });
+        } else {
+            res.status(404).json({ message: "Membership not found." });
+        }
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+// Check if a user is a member of an RSO
+router.post('/checkMembership', async (req, res) => {
+    const { userId, rsoId } = req.body;
+    try {
+        const checkMembership = await pool.query(
+            'SELECT 1 FROM User_RSOs WHERE user_id = $1 AND rso_id = $2',
+            [userId, rsoId]
+        );
+        if (checkMembership.rows.length > 0) {
+            res.json({ isMember: true });
+        } else {
+            res.json({ isMember: false });
+        }
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ message: "Server error" });
