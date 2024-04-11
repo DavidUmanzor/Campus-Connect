@@ -67,3 +67,36 @@ CREATE TABLE User_RSOs (
   FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
   FOREIGN KEY (rso_id) REFERENCES RSOs(rso_id) ON DELETE CASCADE
 );
+
+CREATE OR REPLACE FUNCTION update_rso_status()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Update member_count
+    UPDATE RSOs
+    SET member_count = (
+        SELECT COUNT(*)
+        FROM User_RSOs
+        WHERE rso_id = NEW.rso_id
+    )
+    WHERE rso_id = NEW.rso_id;
+    
+    -- Update is_active based on member_count
+    UPDATE RSOs
+    SET is_active = (member_count >= 5)
+    WHERE rso_id = NEW.rso_id;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger after adding a new member to an RSO
+CREATE TRIGGER after_user_rso_insert
+AFTER INSERT ON User_RSOs
+FOR EACH ROW
+EXECUTE FUNCTION update_rso_status();
+
+-- Trigger after removing a member from an RSO
+CREATE TRIGGER after_user_rso_delete
+AFTER DELETE ON User_RSOs
+FOR EACH ROW
+EXECUTE FUNCTION update_rso_status();

@@ -40,6 +40,21 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+// Get all comments for a specific event
+router.get('/event/:eventId', async (req, res) => {
+    const { eventId } = req.params;
+    try {
+        const commentsRatings = await db.query(
+            'SELECT * FROM commentsratings WHERE event_id = $1',
+            [eventId]
+        );
+        res.json(commentsRatings.rows);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
 // Update a comment rating
 router.put('/update/:id', async (req, res) => {
     const { id } = req.params;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import './RsoPage.css';
 import Navigation from './Navigation';
@@ -9,31 +9,41 @@ const RsoPage = () => {
     const [rsoDetails, setRsoDetails] = useState({});
     const [events, setEvents] = useState([]);
     const [isMember, setIsMember] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false); // New state to track admin status
     const navigate = useNavigate();
     const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
     const userId = localStorage.getItem('userId');
 
     useEffect(() => {
         const fetchData = async () => {
-            // Fetch RSO details
             const rsoResponse = await fetch(`${API_URL}/rsos/${rsoId}`);
-            const rsoData = await rsoResponse.json();
-            setRsoDetails(rsoData);
+            if (rsoResponse.ok) {
+                const rsoData = await rsoResponse.json();
+                setRsoDetails(rsoData);
+            }
 
-            // Check membership
             const membershipResponse = await fetch(`${API_URL}/userRsos/checkMembership`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId, rsoId }),
             });
-            const membershipData = await membershipResponse.json();
-            setIsMember(membershipData.isMember);
+            if (membershipResponse.ok) {
+                const membershipData = await membershipResponse.json();
+                setIsMember(membershipData.isMember);
+            }
 
-            // Fetch events
             const eventsResponse = await fetch(`${API_URL}/events/rso/${rsoId}`);
-            const eventsData = await eventsResponse.json();
-            const visibleEvents = eventsData.filter(event => event.visibility === 'public' || isMember);
-            setEvents(visibleEvents);
+            if (eventsResponse.ok) {
+                const eventsData = await eventsResponse.json();
+                setEvents(eventsData.filter(event => event.visibility === 'public' || isMember));
+            }
+
+            // New: Fetch admin status
+            const adminResponse = await fetch(`${API_URL}/rsos/admin/${rsoId}?userId=${userId}`);
+            if (adminResponse.ok) {
+                const adminData = await adminResponse.json();
+                setIsAdmin(adminData.isAdmin);
+            }
         };
         fetchData();
     }, [API_URL, rsoId, userId, isMember]);
@@ -66,6 +76,15 @@ const RsoPage = () => {
                             <Card.Header as="h5">{rsoDetails.name}</Card.Header>
                             <Card.Body>
                                 <Card.Text>{rsoDetails.description}</Card.Text>
+                                <Card.Text>Member Count: {rsoDetails.member_count}</Card.Text>
+                                <Card.Text>Status: {rsoDetails.is_active ? 'Active' : 'Inactive'}</Card.Text>
+                                {isAdmin && (
+                                    // Only show if the user is an admin
+                                    <div>
+                                        <Button variant="info" onClick={() => navigate(`/createEvent/${rsoId}`)}>Create Event</Button>
+                                        <Button variant="secondary" onClick={() => navigate(`/editRso/${rsoId}`)}>Edit RSO</Button>
+                                    </div>
+                                )}
                                 {!isMember ? (
                                     <Button variant="primary" onClick={handleJoinRso}>Join RSO</Button>
                                 ) : (
@@ -77,19 +96,22 @@ const RsoPage = () => {
                 </Row>
                 <Row>
                     <Col>
-                        <h3>Events</h3>
-                        {events.length ? (
-                            events.map((event, index) => (
-                                <Card key={index} className="mb-3">
+                    <h3>Events</h3>
+                    {events.length ? (
+                        events.map((event, index) => (
+                            <Link key={index} to={`/event/${event.event_id}`} style={{ textDecoration: 'none' }}>
+                                <Card className="mb-3">
                                     <Card.Body>
                                         <Card.Title>{event.name}</Card.Title>
                                         <Card.Text>{event.description}</Card.Text>
+                                        {/* Additional event details can go here */}
                                     </Card.Body>
                                 </Card>
-                            ))
-                        ) : (
-                            <p>No events to display.</p>
-                        )}
+                            </Link>
+                        ))
+                    ) : (
+                        <p>No events to display.</p>
+                    )}
                     </Col>
                 </Row>
             </Container>

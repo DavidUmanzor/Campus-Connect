@@ -42,16 +42,51 @@ router.get("/search", async (req, res) => {
     }
 });
 
-// Get a specific RSO by ID
-router.get('/:id', async (req, res) => {
-    const { id } = req.params;
+router.get('/:rsoId', async (req, res) => {
+    const { rsoId } = req.params;
     try {
-        const rso = await pool.query('SELECT * FROM rsos WHERE rso_id = $1', [id]);
-        res.json(rso.rows[0]);
-    } catch (err) {
-        console.error(err.message);
+        const rsoDetails = await pool.query(`
+            SELECT r.*, COUNT(ur.user_id) AS member_count, r.is_active
+            FROM RSOs r
+            LEFT JOIN User_RSOs ur ON r.rso_id = ur.rso_id
+            WHERE r.rso_id = $1
+            GROUP BY r.rso_id
+        `, [rsoId]);
+
+        if (rsoDetails.rows.length === 0) {
+            return res.status(404).json({ message: "RSO not found." });
+        }
+
+        res.json(rsoDetails.rows[0]);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
     }
 });
+
+// Check if a user is the admin of an RSO
+router.get('/admin/:rsoId', async (req, res) => {
+    const { rsoId } = req.params;
+    const userId = req.query.userId; // Expecting userId to be passed as query parameter
+
+    try {
+        const rsoQuery = await pool.query(
+            'SELECT admin_id FROM RSOs WHERE rso_id = $1',
+            [rsoId]
+        );
+
+        if (rsoQuery.rows.length === 0) {
+            return res.status(404).json({ message: "RSO not found" });
+        }
+
+        const isAdmin = rsoQuery.rows[0].admin_id == userId;
+        res.json({ isAdmin });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: "Server error", details: err.message });
+    }
+});
+
 
 // Get all RSOs for a specific university
 router.get('/university/:universityId', async (req, res) => {
@@ -71,17 +106,17 @@ router.get('/university/:universityId', async (req, res) => {
 // Update RSO
 router.put('/update/:id', async (req, res) => {
     const { id } = req.params;
-    const { name, description, admin_id, university_id } = req.body;
+    const { name, description } = req.body;
+
     try {
-        const updateRso = await pool.query(
-            'UPDATE rsos SET name = $1, description = $2, admin_id = $3, university_id = $4 WHERE rso_id = $5',
-            [name, description, admin_id, university_id, id]
-        );
-        res.json('RSO was updated');
+        await pool.query('UPDATE rsos SET name = $1, description = $2 WHERE rso_id = $3', [name, description, id]);
+        res.json({ message: "RSO updated successfully." });
     } catch (err) {
         console.error(err.message);
+        res.status(500).json({ message: "Server error" });
     }
 });
+
 
 // Delete RSO
 router.delete('/delete/:id', async (req, res) => {
