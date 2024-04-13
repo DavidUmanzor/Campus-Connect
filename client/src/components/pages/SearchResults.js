@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { Container, Row, Col, InputGroup, FormControl, Button, Card } from 'react-bootstrap';
 import './SearchResults.css';
-import Navigation from './Navigation';
+import Navigation from '../Navigation';
 
 const fetchData = async (query, userId) => {
     const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';

@@ -7,10 +7,10 @@ const pool = require('../db');
 // Create a new university
 router.post("/create", async (req, res) => {
     try {
-        const { name, location, description, number_of_students, pictures, email_domain} = req.body;
+        const { name, location, description, number_of_students, pictures, email_domain, latitude, longitude } = req.body;
         const newUniversity = await pool.query(
-            "INSERT INTO universities (name, location, description, number_of_students, pictures, email_domain) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-            [name, location, description, number_of_students, pictures, email_domain]
+            "INSERT INTO universities (name, location, description, number_of_students, pictures, email_domain, latitude, longitude) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
+            [name, location, description, number_of_students, pictures, email_domain, latitude, longitude]
         );
         res.json(newUniversity.rows[0]);
     } catch (err) {
@@ -23,26 +23,28 @@ router.post("/create", async (req, res) => {
 
 // Update a university
 router.put("/update/:id", async (req, res) => {
-    const { id } = req.params; // Get university_id from URL
-    const { name, location, description, number_of_students, pictures, email_domain } = req.body;
+    const { id } = req.params;
+    const { name, location, description, number_of_students, pictures, email_domain, latitude, longitude } = req.body;
     let queryParts = [];
     let queryValues = [];
     let counter = 1;
 
-    // Construct query dynamically based on provided fields
-    if (name) { queryParts.push(`name = $${counter++}`); queryValues.push(name); }
-    if (location) { queryParts.push(`location = $${counter++}`); queryValues.push(location); }
-    if (description) { queryParts.push(`description = $${counter++}`); queryValues.push(description); }
-    if (number_of_students) { queryParts.push(`number_of_students = $${counter++}`); queryValues.push(number_of_students); }
-    if (pictures) { queryParts.push(`pictures = $${counter++}`); queryValues.push(pictures); }
-    if (email_domain) { queryParts.push(`email_domain = $${counter++}`); queryValues.push(email_domain); }
-    queryValues.push(id); // Add id for WHERE clause
+    if (name) { queryParts.push(`name = $${counter}`); queryValues.push(name); counter++; }
+    if (location) { queryParts.push(`location = $${counter}`); queryValues.push(location); counter++; }
+    if (description) { queryParts.push(`description = $${counter}`); queryValues.push(description); counter++; }
+    if (number_of_students) { queryParts.push(`number_of_students = $${counter}`); queryValues.push(number_of_students); counter++; }
+    if (pictures) { queryParts.push(`pictures = $${counter}`); queryValues.push(pictures); counter++; }
+    if (email_domain) { queryParts.push(`email_domain = $${counter}`); queryValues.push(email_domain); counter++; }
+    if (latitude !== undefined) { queryParts.push(`latitude = $${counter}`); queryValues.push(latitude); counter++; }
+    if (longitude !== undefined) { queryParts.push(`longitude = $${counter}`); queryValues.push(longitude); counter++; }
+    
+    queryValues.push(id);
 
     if (queryParts.length > 0) {
         let updateQuery = `UPDATE universities SET ${queryParts.join(", ")} WHERE university_id = $${counter}`;
         const result = await pool.query(updateQuery, queryValues);
         if (result.rowCount > 0) {
-            res.json({ message: "University was updated successfully." });
+            res.json({ message: "University updated successfully." });
         } else {
             res.status(404).json({ message: "University not found or no changes made." });
         }

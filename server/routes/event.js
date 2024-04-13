@@ -4,18 +4,18 @@ const pool = require('../db'); // Assuming you have a db.js file for PostgreSQL 
 
 // CREATE Event
 router.post('/create', async (req, res) => {
-    const { name, category, description, event_time, event_date, location_name, contact_phone, contact_email, visibility, created_by, university_id, rso_id } = req.body;
+    const { name, category, description, event_time, event_date, location_name, latitude, longitude, contact_phone, contact_email, visibility, created_by, university_id, rso_id } = req.body;
 
-    // Prepare the SQL query with optional rso_id
+    // Prepare the SQL query with optional rso_id and include latitude and longitude
     const queryText = `
         INSERT INTO events 
-        (name, category, description, event_time, event_date, location_name, contact_phone, contact_email, visibility, created_by, university_id, rso_id) 
+        (name, category, description, event_time, event_date, location_name, latitude, longitude, contact_phone, contact_email, visibility, created_by, university_id, rso_id) 
         VALUES 
-        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) 
         RETURNING *`;
 
-    // Use null if rso_id is not provided or invalid
-    const values = [name, category, description, event_time, event_date, location_name, contact_phone, contact_email, visibility, created_by, university_id, rso_id || null];
+    // Use null if rso_id is not provided or invalid and add latitude and longitude to the values array
+    const values = [name, category, description, event_time, event_date, location_name, latitude, longitude, contact_phone, contact_email, visibility, created_by, university_id, rso_id || null];
 
     try {
         const newEvent = await pool.query(queryText, values);
@@ -25,7 +25,6 @@ router.post('/create', async (req, res) => {
         res.status(500).json({ message: "Server error", details: err.message });
     }
 });
-
 
 
 // READ all Events
@@ -108,16 +107,40 @@ router.get('/:id', async (req, res) => {
 
 // UPDATE Event
 router.put('/update/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name, category, description, event_time, event_date, location_name, latitude, longitude, contact_phone, contact_email, visibility, created_by, university_id, rso_id } = req.body;
+
+    const updateEventQuery = `
+        UPDATE events SET 
+        name = $1, 
+        category = $2, 
+        description = $3, 
+        event_time = $4, 
+        event_date = $5, 
+        location_name = $6, 
+        latitude = $7, 
+        longitude = $8, 
+        contact_phone = $9, 
+        contact_email = $10, 
+        visibility = $11, 
+        created_by = $12, 
+        university_id = $13, 
+        rso_id = $14
+        WHERE event_id = $15
+    `;
+
+    const updateValues = [name, category, description, event_time, event_date, location_name, latitude, longitude, contact_phone, contact_email, visibility, created_by, university_id, rso_id, id];
+
     try {
-        const { id } = req.params;
-        const { name, category, description, event_time, event_date, location, contact_phone, contact_email, visibility, created_by, university_id } = req.body;
-        const updateEvent = await pool.query(
-            "UPDATE events SET name = $1, category = $2, description = $3, event_time = $4, event_date = $5, location = $6, contact_phone = $7, contact_email = $8, visibility = $9, created_by = $10, university_id = $11 WHERE event_id = $12",
-            [name, category, description, event_time, event_date, location, contact_phone, contact_email, visibility, created_by, university_id, id]
-        );
-        res.json("Event was updated!");
+        const updateEvent = await pool.query(updateEventQuery, updateValues);
+        if (updateEvent.rowCount > 0) {
+            res.json("Event was updated!");
+        } else {
+            res.status(404).json({ message: "Event not found or no changes made." });
+        }
     } catch (err) {
         console.error(err.message);
+        res.status(500).json({ message: "Server error", details: err.message });
     }
 });
 

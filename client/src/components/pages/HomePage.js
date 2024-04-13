@@ -5,10 +5,10 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import "./HomePage.css";
-import DashboardImage from "../images/study-group-1.jpg";
+import DashboardImage from "../../images/study-group-1.jpg";
 
-import SignUp from "./SignUp";
-import Login from "./Login";
+import SignUp from "../forms/SignUp";
+import Login from "../forms/Login";
 
 const HomePage = () => {
 	const [showLogin, setShowLogin] = useState(false);

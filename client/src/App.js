@@ -3,13 +3,13 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 
 // Components
-import HomePage from "./components/HomePage";
-import MainPage from './components/MainPage';
-import SearchResults from './components/SearchResults';
-import UserPage from './components/UserPage';
-import UniversityPage from './components/UniversityPage';
-import RsoPage from './components/RsoPage';
-import EventPage from './components/EventPage';
+import HomePage from "./components/pages/HomePage";
+import MainPage from './components/pages/MainPage';
+import SearchResults from './components/pages/SearchResults';
+import UserPage from './components/pages/UserPage';
+import UniversityPage from './components/pages/UniversityPage';
+import RsoPage from './components/pages/RsoPage';
+import EventPage from './components/pages/EventPage';
 
 function App() {
   return (

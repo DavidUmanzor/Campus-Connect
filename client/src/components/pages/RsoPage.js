@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import './RsoPage.css';
-import Navigation from './Navigation';
+import Navigation from '../Navigation';
 
 const RsoPage = () => {
     const { rsoId } = useParams();

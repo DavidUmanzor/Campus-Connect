@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Navbar, Modal, Form } from 'react-bootstrap';
 import './UserPage.css';
-import Navigation from './Navigation';
+import Navigation from '../Navigation';
 
 const UserPage = () => {
     const [user, setUser] = useState(null);

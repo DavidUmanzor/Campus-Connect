@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, InputGroup, FormControl, Button, Navbar, Nav } from 'react-bootstrap';
 import './MainPage.css'; // Ensure your CSS file is correctly linked
-import campusImage from '../images/university-campus-1.jpg'; // Update with the correct path to your image
-import Navigation from './Navigation';
+import campusImage from '../../images/university-campus-1.jpg'; // Update with the correct path to your image
+import Navigation from '../Navigation';
 
 const MainPage = () => {
   const [searchTerm, setSearchTerm] = useState('');

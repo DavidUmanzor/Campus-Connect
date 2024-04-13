@@ -14,6 +14,8 @@ CREATE TABLE Universities (
   university_id SERIAL PRIMARY KEY,
   name VARCHAR(255) UNIQUE NOT NULL,
   location TEXT,
+  latitude DECIMAL(9,6),
+  longitude DECIMAL(9,6),
   description TEXT,
   number_of_students INT,
   pictures TEXT[] -- Array of image URLs
@@ -38,6 +40,8 @@ CREATE TABLE Events (
   event_time TIME,
   event_date DATE,
   location_name VARCHAR(255),
+  latitude DECIMAL(9,6),
+  longitude DECIMAL(9,6);
   contact_phone VARCHAR(20),
   contact_email VARCHAR(255),
   visibility VARCHAR(50) CHECK (visibility IN ('public', 'private', 'rso')),
