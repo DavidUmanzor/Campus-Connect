@@ -6,15 +6,21 @@ const bcrypt = require('bcrypt');
 router.post("/", async (req, res) => {
     const { name, email, password } = req.body;
     
-    // Extract the domain from the email address
-    const emailDomain = email.split('@')[1];
-    
+    // Extract and format the school key from the email address
     try {
-        // Find a university with a matching email domain
-        const uniRes = await pool.query("SELECT university_id FROM Universities WHERE email_domain = $1", [emailDomain]);
+        const emailParts = email.split('@');
+        if (emailParts.length !== 2 || !emailParts[1].endsWith('.edu')) {
+            return res.status(400).json({ message: "Invalid educational email format." });
+        }
+        const domainParts = emailParts[1].split('.');
+        const schoolKey = domainParts[0].toLowerCase();  // Normalize to lowercase
+
+        // Find a university with a matching school key
+        const uniRes = await pool.query("SELECT university_id FROM Universities WHERE email_domain = $1", [schoolKey]);
         
         if (uniRes.rows.length === 0) {
-            return res.status(400).json({ message: "No university found with your email domain." });
+            // No university found, offer to create one
+            return res.status(404).json({ message: "No university found with your email domain. Would you like to create one?", createUniversity: true });
         }
         
         const universityId = uniRes.rows[0].university_id;

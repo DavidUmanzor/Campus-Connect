@@ -55,6 +55,7 @@ const EventPage = () => {
                 const commentsResponse = await fetch(`${API_URL}/commentsratings/event/${eventId}`);
                 if (commentsResponse.ok) {
                     const commentsData = await commentsResponse.json();
+                    console.log(commentsData);
                     setComments(commentsData);
                 }
             }
@@ -96,24 +97,31 @@ const EventPage = () => {
         }
     };
 
+    const [editingCommentId, setEditingCommentId] = useState(null);
+    const [editingFormData, setEditingFormData] = useState({ text: '', rating: '' });
+
+    // Function to start editing a comment
+    const handleEditComment = (comment) => {
+        setEditingCommentId(comment.comment_id);
+        setEditingFormData({ text: comment.text, rating: comment.rating });
+    };
+
+    // Function to save the edited comment
+    const handleSaveEdit = async () => {
+        const response = await fetch(`${API_URL}/commentsratings/update/${editingCommentId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...editingFormData, user_id: userId, event_id: eventId }),
+        });
+        if (response.ok) {
+            // Refresh comments or update state directly
+            const updatedComments = await response.json();
+            setComments(updatedComments);
+            setEditingCommentId(null); // Reset editing state
+        }
+    };
+
     const [universityId, setUniversityId] = useState(null);
-    // Format date and time
-    // Create a Date object from the event date and time
-    const eventDateTime = new Date(`${eventDetails.event_date}T${eventDetails.event_time}`);
-
-    // Format the time as a string in 12-hour format with AM/PM
-    const formattedTime = eventDateTime.toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true // Enables 12-hour format; set to false for 24-hour format
-    });
-
-    // Format the date as a string in mm-dd-yyyy format
-    const formattedDate = eventDateTime.toLocaleDateString([], {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-    });
         
     return (
         <Container className="event-page">
@@ -158,21 +166,44 @@ const EventPage = () => {
             <Row>
                 <Col>
                     <h3>Comments</h3>
-                    {comments.length > 0 ? (
-                        comments.map((comment, index) => (
-                            <Card key={index} className="mb-3">
-                                <Card.Body>
+                    {comments.map((comment) => (
+                    <Card key={comment.comment_id} className="mb-3">
+                        <Card.Body>
+                            {editingCommentId === comment.comment_id ? (
+                                // Edit form for comments
+                                <Form>
+                                    <Form.Group>
+                                        <Form.Control
+                                            as="textarea"
+                                            value={editingFormData.text}
+                                            onChange={(e) => setEditingFormData({...editingFormData, text: e.target.value})}
+                                        />
+                                        <Form.Control
+                                            type="number"
+                                            value={editingFormData.rating}
+                                            onChange={(e) => setEditingFormData({...editingFormData, rating: Math.min(Math.max(e.target.value, 1), 5)})}
+                                        />
+                                        <Button onClick={handleSaveEdit}>Save</Button>
+                                        <Button onClick={() => setEditingCommentId(null)}>Cancel</Button>
+                                    </Form.Group>
+                                </Form>
+                            ) : (
+                                <Card.Body className="d-flex justify-content-between align-items-center">
+                                    <div>
                                     <Card.Title>Rating: {comment.rating}</Card.Title>
                                     <Card.Text>{comment.text}</Card.Text>
-                                    {userId === comment.user_id && (
-                                        <Button variant="danger" onClick={() => handleDeleteComment(comment.comment_id)}>Delete</Button>
+                                    </div>
+                                    {userId == comment.user_id && (
+                                        <div>
+                                            <Button variant="secondary" onClick={() => handleEditComment(comment)}>Edit</Button>
+                                            <Button variant="danger" onClick={() => handleDeleteComment(comment.comment_id)}>Delete</Button>
+                                        </div>
                                     )}
                                 </Card.Body>
-                            </Card>
-                        ))
-                    ) : (
-                        <p>No comments yet.</p>
-                    )}
+                            )}
+                        </Card.Body>
+                    </Card>
+                ))}
                 </Col>
             </Row>
 
@@ -195,7 +226,7 @@ const EventPage = () => {
                             <Form.Control
                                 type="number"
                                 value={commentFormData.rating}
-                                onChange={(e) => setCommentFormData({ ...commentFormData, rating: e.target.value })}
+                                onChange={(e) => setCommentFormData({ ...commentFormData, rating: Math.min(Math.max(e.target.value, 1), 5) })}
                                 required
                             />
                         </Form.Group>
