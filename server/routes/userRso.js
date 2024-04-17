@@ -90,4 +90,18 @@ router.get('/members/:rsoId', async (req, res) => {
     }
 });
 
+// Get all users - rso relations
+router.get('/all/', async (req, res) => {
+    const { rsoId } = req.params;
+    try {
+        const rsoUsers = await pool.query(
+            'SELECT * FROM User_RSOs'
+        );
+        res.json(rsoUsers.rows);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
 module.exports = router;

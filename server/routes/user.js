@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require("../db");
+const bcrypt = require('bcrypt');
 
 /// Create Actions
 
@@ -64,6 +65,20 @@ router.put("/change-email/:id", async (req, res) => {
     try {
         await pool.query("UPDATE users SET email = $1 WHERE user_id = $2", [email, id]);
         res.json({ message: "Email updated successfully." });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+// Change user email
+router.put("/change-password/:id", async (req, res) => {
+    const { id } = req.params;
+    const { password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    try {
+        await pool.query("UPDATE users SET password = $1 WHERE user_id = $2", [hashedPassword, id]);
+        res.json({ message: "Password updated successfully." });
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ message: "Server error" });

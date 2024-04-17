@@ -30,8 +30,8 @@ router.post("/", async (req, res) => {
         
         // Create the user with the university ID
         const newUser = await pool.query(
-            "INSERT INTO Users (name, email, password, university_id) VALUES ($1, $2, $3, $4) RETURNING *",
-            [name, email, hashedPassword, universityId]
+            "INSERT INTO Users (name, email, password, university_id, role) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+            [name, email, hashedPassword, universityId, 'student']
         );
         
         res.json({ message: "User created successfully.", user: newUser.rows[0] });

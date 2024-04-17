@@ -11,6 +11,11 @@ const UserPage = () => {
     const [showModal, setShowModal] = useState(false);
     const [modalType, setModalType] = useState(''); // Only 'email' is used now
     const [newEmail, setNewEmail] = useState('');
+    const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+    const [oldPassword, setOldPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [passwordChangeSuccess, setPasswordChangeSuccess] = useState('');
+    const [passwordChangeError, setPasswordChangeError] = useState('');
     const userId = localStorage.getItem('userId');
     const navigate = useNavigate();
     const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -75,6 +80,32 @@ const UserPage = () => {
         }
     };
 
+    const handleChangePassword = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await fetch(`${API_URL}/users/change-password/${userId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ newPassword }),
+            });
+            const data = await response.json();
+            if (response.ok) {
+                // Handle successful password change
+                setPasswordChangeSuccess(data.message);
+                setPasswordChangeError('');
+                setShowChangePasswordModal(false);
+            } else {
+                // Handle unsuccessful password change
+                setPasswordChangeSuccess('');
+                setPasswordChangeError(data.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            setPasswordChangeSuccess('');
+            setPasswordChangeError('Failed to change password due to a server error.');
+        }
+    };
+
     return (
         <div className="user-page">
             <Navigation />
@@ -107,10 +138,34 @@ const UserPage = () => {
                 <Row className="justify-content-center my-4">
                     <Col md={6}>
                         <Button variant="secondary" onClick={() => { setModalType('email'); setShowModal(true); }}>Change Email</Button>
+                        <Button variant="info" onClick={() => setShowChangePasswordModal(true)}>Change Password</Button>
                         <Button variant="danger" onClick={handleDeleteAccount}>Delete Account</Button>
                     </Col>
                 </Row>
             </Container>
+            {/* Modal for changing user password */}
+            <Modal show={showChangePasswordModal} onHide={() => setShowChangePasswordModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Change Password</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={handleChangePassword}>
+                        <Form.Group controlId="formOldPassword">
+                            <Form.Label>Old Password</Form.Label>
+                            <Form.Control type="password" placeholder="Enter old password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} required />
+                        </Form.Group>
+                        <Form.Group controlId="formNewPassword">
+                            <Form.Label>New Password</Form.Label>
+                            <Form.Control type="password" placeholder="Enter new password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
+                        </Form.Group>
+                        <Button variant="primary" type="submit">
+                            Update Password
+                        </Button>
+                        {passwordChangeSuccess && <div className="alert alert-success">{passwordChangeSuccess}</div>}
+                        {passwordChangeError && <div className="alert alert-danger">{passwordChangeError}</div>}
+                    </Form>
+                </Modal.Body>
+            </Modal>
             {/* Modal for updating user email or university */}
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>

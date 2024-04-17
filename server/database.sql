@@ -30,6 +30,7 @@ CREATE TABLE RSOs (
   university_id INT,
   FOREIGN KEY (admin_id) REFERENCES Users(user_id),
   FOREIGN KEY (university_id) REFERENCES Universities(university_id)
+  is_active BOOLEAN DEFAULT FALSE,
 );
 
 CREATE TABLE Events (
