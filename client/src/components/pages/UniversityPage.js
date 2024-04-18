@@ -6,6 +6,7 @@ import Navigation from '../Navigation';
 import UniversityImages from '../UniversityImages';
 import CreateRSO from '../forms/CreateRSO';
 import CreateEvent from '../forms/CreateEvent';
+import { featureGroup } from 'leaflet';
 
 const UniversityPage = () => {
     const { universityId } = useParams();
@@ -17,25 +18,36 @@ const UniversityPage = () => {
     const navigate = useNavigate();
     const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
+    const fetchData = async () => {
+        try {
+            const universityResponse = await fetch(`${API_URL}/universities/${universityId}`);
+            const universityData = await universityResponse.json();
+            setUniversity(universityData);
+    
+            const rsosResponse = await fetch(`${API_URL}/rsos/university/${universityId}`);
+            const rsosData = await rsosResponse.json();
+            setRsos(rsosData);
+    
+            const eventsResponse = await fetch(`${API_URL}/events/university/${universityId}`);
+            const eventsData = await eventsResponse.json();
+    
+            // Fetch RSO details for each event that has an RSO ID
+            const eventsWithRso = await Promise.all(eventsData.map(async (event) => {
+                if (event.rso_id) {
+                    const rsoResponse = await fetch(`${API_URL}/rsos/${event.rso_id}`);
+                    const rsoData = await rsoResponse.json();
+                    return { ...event, rso_name: rsoData.name };
+                }
+                return { ...event, rso_name: 'University' };
+            }));
+    
+            setEvents(eventsWithRso);
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
+
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const universityResponse = await fetch(`${API_URL}/universities/${universityId}`);
-                const universityData = await universityResponse.json();
-                setUniversity(universityData);
-
-                const rsosResponse = await fetch(`${API_URL}/rsos/university/${universityId}`);
-                const rsosData = await rsosResponse.json();
-                setRsos(rsosData);
-
-                const eventsResponse = await fetch(`${API_URL}/events/university/${universityId}`);
-                const eventsData = await eventsResponse.json();
-                setEvents(eventsData);
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        };
-
         fetchData();
     }, [API_URL, universityId]);
 
@@ -78,6 +90,7 @@ const UniversityPage = () => {
                             universityId={universityId}
                             onRsoCreated={() => {
                                 console.log('RSO Created! Fetching new list...');
+                                fetchData();
                                 setShowCreateRsoModal(false);
                             }}
                         />
@@ -104,6 +117,7 @@ const UniversityPage = () => {
                             universityId={universityId}
                             onEventCreated={() => {
                                 console.log('Event Created! Fetching new list...');
+                                fetchData();
                                 setShowCreateEventModal(false);
                             }}
                         />

@@ -80,22 +80,22 @@ router.get('/rso/:rsoId', async (req, res) => {
     }
 });
 
-
 router.get("/search", async (req, res) => {
     const { query, userId } = req.query;
+    const searchQuery = `%${query}%`;
 
     try {
-        const sql = `
-            SELECT e.* FROM events e
+        const events = await pool.query(`
+            SELECT e.*, r.is_active FROM events e
+            LEFT JOIN RSOs r ON e.rso_id = r.rso_id
             LEFT JOIN User_RSOs ur ON e.rso_id = ur.rso_id AND ur.user_id = $2
             WHERE (e.name ILIKE $1 OR e.description ILIKE $1)
             AND (
                 e.visibility = 'public' OR 
-                (e.visibility = 'rso' AND ur.user_id IS NOT NULL)
-            )`;
-        
-        const searchQuery = `%${query}%`;
-        const events = await pool.query(sql, [searchQuery, userId]);
+                (e.visibility = 'private' AND e.university_id = (SELECT university_id FROM Users WHERE user_id = $2)) OR
+                (e.visibility = 'rso' AND ur.user_id = $2 AND r.is_active = true)
+            )
+        `, [searchQuery, userId]);
 
         res.json(events.rows);
     } catch (err) {
@@ -133,43 +133,27 @@ router.get('/:id', async (req, res) => {
 });
 
 // UPDATE Event
-router.put('/update/:id', async (req, res) => {
-    const { id } = req.params;
-    const { name, category, description, event_time, event_date, location_name, latitude, longitude, contact_phone, contact_email, visibility, created_by, university_id, rso_id } = req.body;
-
-    const updateEventQuery = `
-        UPDATE events SET 
-        name = $1, 
-        category = $2, 
-        description = $3, 
-        event_time = $4, 
-        event_date = $5, 
-        location_name = $6, 
-        latitude = $7, 
-        longitude = $8, 
-        contact_phone = $9, 
-        contact_email = $10, 
-        visibility = $11, 
-        created_by = $12, 
-        university_id = $13, 
-        rso_id = $14
-        WHERE event_id = $15
-    `;
-
-    const updateValues = [name, category, description, event_time, event_date, location_name, latitude, longitude, contact_phone, contact_email, visibility, created_by, university_id, rso_id, id];
+router.put('/update/:eventId', async (req, res) => {
+    const { eventId } = req.params;
+    const { name, description, event_time, event_date, location_name, latitude, longitude, visibility } = req.body;
 
     try {
-        const updateEvent = await pool.query(updateEventQuery, updateValues);
-        if (updateEvent.rowCount > 0) {
-            res.json("Event was updated!");
+        const result = await pool.query(
+            "UPDATE events SET name = $1, description = $2, event_time = $3, event_date = $4, location_name = $5, latitude = $6, longitude = $7, visibility = $8 WHERE event_id = $9 RETURNING *",
+            [name, description, event_time, event_date, location_name, latitude, longitude, visibility, eventId]
+        );
+
+        if (result.rows.length > 0) {
+            res.json(result.rows[0]);
         } else {
-            res.status(404).json({ message: "Event not found or no changes made." });
+            res.status(404).json({ message: 'Event not found or no changes made.' });
         }
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ message: "Server error", details: err.message });
     }
 });
+
 
 // DELETE Event
 router.delete('/delete/:id', async (req, res) => {

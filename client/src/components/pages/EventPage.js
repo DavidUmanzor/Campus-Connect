@@ -67,6 +67,40 @@ const EventPage = () => {
         setShowEditEventModal(!showEditEventModal);
     };
 
+    const handleEventEditSave = async (updatedEventData) => {
+        try {
+            const response = await fetch(`${API_URL}/events/update/${eventId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: updatedEventData.name,
+                    description: updatedEventData.description,
+                    event_time: updatedEventData.event_time,
+                    event_date: new Date(updatedEventData.event_date).toISOString().slice(0, 10), // Ensure date is in YYYY-MM-DD format
+                    location_name: updatedEventData.location_name,
+                    latitude: updatedEventData.latitude,
+                    longitude: updatedEventData.longitude,
+                    visibility: updatedEventData.visibility
+                }),
+            });
+    
+            if (response.ok) {
+                const updatedEvent = await response.json();
+                setEventDetails(updatedEvent); // Update local state with new event details
+                setShowEditEventModal(false); // Hide the modal
+                alert('Event updated successfully!');
+            } else {
+                const errorData = await response.json();
+                throw new Error(`Failed to update event: ${errorData.message}`);
+            }
+        } catch (error) {
+            console.error('Error updating event:', error);
+            alert(error.message);
+        }
+    };
+
     const handleDeleteEvent = async () => {
         await fetch(`${API_URL}/events/delete/${eventId}`, { method: 'DELETE' });
         navigate(-1);
@@ -105,13 +139,23 @@ const EventPage = () => {
         setEditingFormData({ text: comment.text, rating: comment.rating });
     };
 
-    // Function to save the edited comment
     const handleSaveEdit = async () => {
+        if (!editingCommentId) {
+            console.error('Error: No comment selected for editing');
+            return;
+        }
+    
         const response = await fetch(`${API_URL}/commentsratings/update/${editingCommentId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...editingFormData, user_id: userId, event_id: eventId }),
+            body: JSON.stringify({
+                text: editingFormData.text,
+                rating: editingFormData.rating,
+                user_id: userId,
+                event_id: eventId
+            }),
         });
+    
         if (response.ok) {
             const updatedComment = await response.json();
             setComments(comments.map(comment =>
@@ -120,10 +164,12 @@ const EventPage = () => {
             setEditingCommentId(null);
         } else {
             console.error('Failed to update comment');
-            const errorData = await response.text();
-            alert(`Could not update comment: ${errorData}`);
+            const errorData = await response.json();
+            alert(`Could not update comment: ${errorData.message}`);
         }
     };
+
+
 
     const [universityId, setUniversityId] = useState(null);
         
@@ -146,7 +192,12 @@ const EventPage = () => {
                         </MapContainer>
                     )}
 
-                    <Link to={`/rso/${eventDetails.rso_id || ''}`}><Button variant="primary">Back to RSO</Button></Link>
+                    {eventDetails.rso_id ? (
+                        <Link to={`/rso/${eventDetails.rso_id}`}><Button variant="primary">Back to RSO</Button></Link>
+                    ) : (
+                        <Button variant="primary" onClick={() => navigate(`/university/${eventDetails.university_id}`)}>Back to University</Button>
+                    )}
+
                     {isAdmin && (
                         <div>
                             <Button variant="danger" onClick={handleDeleteEvent}>Delete Event</Button>
@@ -156,6 +207,7 @@ const EventPage = () => {
                         <EditEvent
                             show={showEditEventModal}
                             onHide={handleToggleEventModal}
+                            onSave={handleEventEditSave}
                             universityId={universityId}
                             event={eventDetails}
                             onEventCreated={() => {

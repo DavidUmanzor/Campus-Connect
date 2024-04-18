@@ -54,19 +54,35 @@ router.get('/all', async (req, res) => {
 
 // Search RSOs by name or description
 router.get("/search", async (req, res) => {
+    const { query, userId } = req.query;
+    const searchQuery = `%${query}%`;
+
     try {
-        const { query } = req.query; // Get the search query from query parameters
-        const searchQuery = `%${query}%`; // Prepare the search query for a partial match
-        const searchResults = await pool.query(
-            "SELECT * FROM rsos WHERE name ILIKE $1 OR description ILIKE $1",
-            [searchQuery]
+        // First, retrieve the user's university ID
+        const userUniversity = await pool.query(
+            "SELECT university_id FROM users WHERE user_id = $1",
+            [userId]
         );
-        res.json(searchResults.rows);
+
+        if (userUniversity.rows.length === 0) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        const universityId = userUniversity.rows[0].university_id;
+
+        // Then, fetch RSOs that match the search query and are linked to the user's university
+        const rsos = await pool.query(
+            "SELECT * FROM rsos WHERE (name ILIKE $1 OR description ILIKE $1) AND university_id = $2",
+            [searchQuery, universityId]
+        );
+
+        res.json(rsos.rows);
     } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: "Server error" });
+        console.error("Error searching RSOs: ", err);
+        res.status(500).json({ message: "Server error", details: err.message });
     }
 });
+
 
 router.post('/check-new-admin', async (req, res) => {
     const { email, rsoId } = req.body;

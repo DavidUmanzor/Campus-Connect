@@ -7,16 +7,16 @@ import Navigation from '../Navigation';
 const fetchData = async (query, userId) => {
     const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
+    // Preparing endpoints
+    const searchEndpoint = query ? `/search?query=${encodeURIComponent(query)}` : '/all';
+    const universityPromise = fetch(`${baseUrl}/universities${searchEndpoint}`);
+    const rsoPromise = fetch(`${baseUrl}/rsos/search?query=${encodeURIComponent(query)}&userId=${userId}`);
+    
+    // This endpoint should already consider visibility rules including RSO membership
+    const eventEndpoint = query ? `/events/search?query=${encodeURIComponent(query)}&userId=${userId}` : `/events/allowed?userId=${userId}`;
+    const eventPromise = fetch(`${baseUrl}${eventEndpoint}`);
+
     try {
-
-        const searchEndpoint = query ? `/search?query=${encodeURIComponent(query)}` : '/all';
-
-        const universityPromise = fetch(`${baseUrl}/universities${searchEndpoint}`);
-        const rsoPromise = fetch(`${baseUrl}/rsos${searchEndpoint}`);
-
-        const eventEndpoint = query ? searchEndpoint : `/events/allowed?userId=${userId}`;
-        const eventPromise = fetch(`${baseUrl}${eventEndpoint}`);
-
         const [universitiesResponse, rsosResponse, eventsResponse] = await Promise.all([universityPromise, rsoPromise, eventPromise]);
 
         if (!universitiesResponse.ok || !rsosResponse.ok || !eventsResponse.ok) {
@@ -29,7 +29,7 @@ const fetchData = async (query, userId) => {
 
         return {
             universities: universitiesData,
-            rsos: rsosData,
+            rsos: rsosData.filter(rso => rso.university_id === userId.university_id), // Assuming a user can only see RSOs from their own university
             events: eventsData
         };
     } catch (error) {
@@ -37,6 +37,7 @@ const fetchData = async (query, userId) => {
         return { universities: [], rsos: [], events: [] };
     }
 };
+
 
 const SearchResults = () => {
     const location = useLocation();
@@ -46,17 +47,15 @@ const SearchResults = () => {
     const userId = localStorage.getItem('userId');
 
     useEffect(() => {
-        if (searchQuery) {
-            fetchData('', userId).then(data => setResults(data));
-        }
-    }, [userId]);
+        fetchData(searchQuery, userId).then(data => setResults(data));
+    }, [searchQuery, userId]);
 
     const handleSearchInputChange = e => setSearchQuery(e.target.value);
 
     const handleSearch = () => {
-    navigate(`/searchresults?query=${encodeURIComponent(searchQuery)}`);
-    fetchData(searchQuery, userId).then(data => setResults(data));
-};
+        navigate(`/searchresults?query=${encodeURIComponent(searchQuery)}`);
+        fetchData(searchQuery, userId).then(data => setResults(data));
+    };
 
     const handleKeyPress = e => {
         if (e.key === 'Enter') {
