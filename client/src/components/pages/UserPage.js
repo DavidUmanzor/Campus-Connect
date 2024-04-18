@@ -136,8 +136,6 @@ const UserPage = () => {
                 </Row>
                 <Row className="justify-content-center my-4">
                     <Col md={6}>
-                        <Button variant="secondary" onClick={() => { setModalType('email'); setShowModal(true); }}>Change Email</Button>
-                        <Button variant="info" onClick={() => setShowChangePasswordModal(true)}>Change Password</Button>
                         <Button variant="danger" onClick={handleDeleteAccount}>Delete Account</Button>
                     </Col>
                 </Row>

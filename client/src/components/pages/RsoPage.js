@@ -253,24 +253,27 @@ const RsoPage = () => {
                         onEventCreated={fetchEvents}  // Pass the fetchEvents function as a prop
                     />
                     <h3>Events</h3>
-                    {events.length ? (
-                        events.map((event, index) => (
-                            <Link key={index} to={`/event/${event.event_id}`} style={{ textDecoration: 'none' }}>
-                                <Card className="mb-3">
-                                    <Card.Body>
-                                        <Card.Title>{event.name}</Card.Title>
-                                        <Card.Text>{event.description}</Card.Text>
-                                        {/* Additional event details can go here */}
-                                    </Card.Body>
-                                </Card>
-                            </Link>
-                        ))
-                    ) : (
-                        isRsoActive ? (
-                        <p>No events to display.</p>
+                    {
+                        rsoDetails.is_active ? (
+                            events.length > 0 ? (
+                                events.map((event, index) => (
+                                    <Link key={index} to={`/event/${event.event_id}`} style={{ textDecoration: 'none' }}>
+                                        <Card className="mb-3">
+                                            <Card.Body>
+                                                <Card.Title>{event.name}</Card.Title>
+                                                <Card.Text>{event.description}</Card.Text>
+                                                {/* Additional event details can go here */}
+                                            </Card.Body>
+                                        </Card>
+                                    </Link>
+                                ))
+                            ) : (
+                                <p>No events to display.</p>
+                            )
                         ) : (
-                        <p>RSO is not active. RSO requires more people to be an actively registered RSO.</p>)
-                    )}
+                            <p>RSO is not active. RSO requires more members to be an actively registered RSO.</p>
+                        )
+                    }
                     </Col>
                 </Row>
             </Container>
