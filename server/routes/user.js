@@ -15,7 +15,10 @@ router.post("/create", async(req,res) => {
             [name, email, password, role, university_id]
             );
         res.json(newUser.rows[0]);
-    }   catch (err) {
+    } catch (err) {
+        if (err.code === '23505') { // PostgreSQL error code for unique violation
+            return res.status(409).json({ message: "Email is already in use." }); // 409 Conflict
+        }
         console.error(err.message);
         res.status(500).send('Server error');
     }
@@ -26,10 +29,9 @@ router.post("/create", async(req,res) => {
 // Update a user
 router.put("/update/:id", async (req, res) => {
     try {
-        const { id } = req.params; // The user's ID
-        const { name, email, password, role, university_id } = req.body; // Data from the request body
+        const { id } = req.params;
+        const { name, email, password, role, university_id } = req.body;
 
-        // Corrected: Use "user_id" instead of "id" in the WHERE clause
         const user = await pool.query("SELECT * FROM users WHERE user_id = $1", [id]);
 
         if (user.rows.length === 0) {
@@ -44,13 +46,26 @@ router.put("/update/:id", async (req, res) => {
             university_id: university_id || user.rows[0].university_id
         };
 
-        // Corrected: Use "user_id" instead of "id" in the WHERE clause
         const updatedUserResult = await pool.query(
             "UPDATE users SET name = $1, email = $2, password = $3, role = $4, university_id = $5 WHERE user_id = $6 RETURNING *",
             [updatedUser.name, updatedUser.email, updatedUser.password, updatedUser.role, updatedUser.university_id, id]
         );
 
         res.json(updatedUserResult.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+router.put('/updateRole', async (req, res) => {
+    const { userId, role } = req.body;
+    try {
+        await pool.query(
+            "UPDATE Users SET role = $1 WHERE user_id = $2",
+            [role, userId]
+        );
+        res.json({ message: "User role updated successfully." });
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ message: "Server error" });
@@ -88,11 +103,10 @@ router.put("/change-password/:id", async (req, res) => {
 
 // Change user's university
 router.put("/change-university/:id", async (req, res) => {
-    const { id } = req.params; // User's ID
-    const { universityName } = req.body; // New university name
+    const { id } = req.params;
+    const { universityName } = req.body;
 
     try {
-        // Check if university exists
         let uniRes = await pool.query("SELECT university_id FROM universities WHERE name = $1", [universityName]);
         let universityId;
 

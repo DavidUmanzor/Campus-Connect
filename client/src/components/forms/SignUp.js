@@ -57,8 +57,19 @@ const SignUp = ({ onLoginClick, onClose }) => {
       }
     } catch (error) {
       console.error('SignUp Error:', error);
-      alert('An error occurred. Please try again.');
-    }
+      // Assuming the error is a network error (cannot reach server, etc.)
+      if (!error.response) {
+          alert('An error occurred. Please try again.');
+      } else {
+          // Handle the case where the email is already in use
+          const data = await error.response.json();
+          if (data.message === "Email is already in use.") {
+              setErrors({ ...errors, email: data.message });
+          } else {
+              alert(data.message || 'Failed to create account.');
+          }
+      }
+  }
   };
 
   return (
@@ -68,7 +79,14 @@ const SignUp = ({ onLoginClick, onClose }) => {
         <h2>Sign Up</h2>
         <input type="text" placeholder="Name" className={errors.name ? 'error' : ''} value={name} onChange={(e) => setName(e.target.value)} />
         {errors.name && <p className="error-text">{errors.name}</p>}
-        <input type="email" placeholder="Email" className={errors.email ? 'error' : ''} value={email} onChange={(e) => setEmail(e.target.value)} />
+        {/* ... */}
+        <input
+            type="email"
+            placeholder="Email"
+            className={errors.email ? 'error' : ''}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+        />
         {errors.email && <p className="error-text">{errors.email}</p>}
         <input type="password" placeholder="Password" className={errors.password ? 'error' : ''} value={password} onChange={(e) => setPassword(e.target.value)} />
         {errors.password && <p className="error-text">{errors.password}</p>}

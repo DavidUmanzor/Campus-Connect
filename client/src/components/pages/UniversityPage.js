@@ -4,8 +4,8 @@ import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import './UniversityPage.css';
 import Navigation from '../Navigation';
 import UniversityImages from '../UniversityImages';
-import CreateRSO from '../forms/CreateRSO'; // Import the CreateRSO component
-import CreateEvent from '../forms/CreateEvent'; // Import the CreateEvent component
+import CreateRSO from '../forms/CreateRSO';
+import CreateEvent from '../forms/CreateEvent';
 
 const UniversityPage = () => {
     const { universityId } = useParams();
@@ -44,7 +44,6 @@ const UniversityPage = () => {
         setShowCreateRsoModal(!showCreateRsoModal);
     };
 
-    // Function to toggle the Event creation modal
     const handleToggleEventModal = () => {
         setShowCreateEventModal(!showCreateEventModal);
     };
@@ -53,7 +52,7 @@ const UniversityPage = () => {
         <Container className="university-page">
             <Navigation />
             <Row className="justify-content-center">
-                <Col md={8}>
+                <Col md={10}>
                     <Card className="text-center">
                         <Card.Header as="h2">{university.name}</Card.Header>
                         <UniversityImages pictures={university.pictures} />
@@ -78,10 +77,8 @@ const UniversityPage = () => {
                             onHide={handleToggleModal}
                             universityId={universityId}
                             onRsoCreated={() => {
-                                // Add logic here for what happens after RSO is created
-                                // For example, you might want to refetch the list of RSOs
                                 console.log('RSO Created! Fetching new list...');
-                                setShowCreateRsoModal(false); // Hide modal after creation
+                                setShowCreateRsoModal(false);
                             }}
                         />
                         <Card.Body>
@@ -106,9 +103,8 @@ const UniversityPage = () => {
                             onHide={handleToggleEventModal}
                             universityId={universityId}
                             onEventCreated={() => {
-                                // Add logic here for what happens after an event is created
                                 console.log('Event Created! Fetching new list...');
-                                setShowCreateEventModal(false); // Hide modal after creation
+                                setShowCreateEventModal(false);
                             }}
                         />
                         <Card.Body>

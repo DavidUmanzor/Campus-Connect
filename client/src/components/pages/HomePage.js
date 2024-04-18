@@ -38,7 +38,6 @@ const HomePage = () => {
 			<Row className="image-display">
 				<img src={DashboardImage} alt="Dashboard" className="dashboard-image" />
 				<h1 className="page-name">Campus Connect</h1>
-				<h2 className="image-caption">Your way of keeping involved and connected with your campus</h2>
 			</Row>
 			<Row className="content-seperator"></Row>
 			<Row className="content-display">

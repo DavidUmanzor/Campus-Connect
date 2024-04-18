@@ -1,7 +1,6 @@
 /* MainPage.css */
 
-/* MainPage.css */
-.main-page-container {
+  .main-page-container {
     padding: 0;
     margin: 0;
   }
@@ -31,14 +30,30 @@
   
   .campus-image {
     width: 100%;
-    height: auto; /* Adjust as necessary */
+    height: auto;
+  }
+  
+  .image-container img {
+    width: 100%;
+    max-height: 500px;
+    object-fit: cover;
+    display: block;
+  }
+  
+  .image-container {
+    position: relative;
+    text-align: center;
   }
   
   .image-caption {
     position: absolute;
-    top: 50%; /* Adjust as necessary */
+    bottom: 0;
     left: 50%;
-    transform: translate(-50%, -50%);
-    color: #fff; /* Or any color you want */
-    font-size: 2em; /* Adjust as necessary */
-  }  
+    transform: translateX(-50%);
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  

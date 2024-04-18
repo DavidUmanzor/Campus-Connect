@@ -1,25 +1,38 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../db'); // Assuming you have a db.js file for PostgreSQL pool
+const pool = require('../db');
 
-// CREATE Event
 router.post('/create', async (req, res) => {
     const { name, category, description, event_time, event_date, location_name, latitude, longitude, contact_phone, contact_email, visibility, created_by, university_id, rso_id } = req.body;
 
-    // Prepare the SQL query with optional rso_id and include latitude and longitude
-    const queryText = `
-        INSERT INTO events 
-        (name, category, description, event_time, event_date, location_name, latitude, longitude, contact_phone, contact_email, visibility, created_by, university_id, rso_id) 
-        VALUES 
-        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) 
-        RETURNING *`;
-
-    // Use null if rso_id is not provided or invalid and add latitude and longitude to the values array
-    const values = [name, category, description, event_time, event_date, location_name, latitude, longitude, contact_phone, contact_email, visibility, created_by, university_id, rso_id || null];
-
     try {
-        const newEvent = await pool.query(queryText, values);
+        // Check for any events at the same location and time
+        const conflictCheckQuery = `
+            SELECT r.name AS rso_name, e.location_name, e.event_time
+            FROM events e
+            JOIN RSOs r ON e.rso_id = r.rso_id
+            WHERE e.location_name = $1 AND e.event_date = $2 AND e.event_time = $3 AND r.is_active = true
+            LIMIT 1;
+        `;
+        const conflictCheck = await pool.query(conflictCheckQuery, [location_name, event_date, event_time]);
+        
+        if (conflictCheck.rows.length > 0) {
+            const conflictEvent = conflictCheck.rows[0];
+            return res.status(409).json({ message: `Conflict with event from "${conflictEvent.rso_name}" - ${conflictEvent.location_name}, at ${conflictEvent.event_time}.` });
+        }
+
+        // No conflict found
+        const createEventQuery = `
+            INSERT INTO events 
+            (name, category, description, event_time, event_date, location_name, latitude, longitude, contact_phone, contact_email, visibility, created_by, university_id, rso_id) 
+            VALUES 
+            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) 
+            RETURNING *`;
+
+        // Execute the query to create a new event
+        const newEvent = await pool.query(createEventQuery, [name, category, description, event_time, event_date, location_name, latitude, longitude, contact_phone, contact_email, visibility, created_by, university_id, rso_id || null]);
         res.json(newEvent.rows[0]);
+
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ message: "Server error", details: err.message });
@@ -68,13 +81,10 @@ router.get('/rso/:rsoId', async (req, res) => {
 });
 
 
-// Enhanced search to consider event visibility and user membership in RSOs
 router.get("/search", async (req, res) => {
-    const { query, userId } = req.query; // Expect userId to be passed as a query parameter
+    const { query, userId } = req.query;
 
     try {
-        // This SQL is hypothetical and needs to be adjusted based on your actual database schema.
-        // It assumes there is a way to check if a user is a member of the RSO (via a JOIN on User_RSOs for example).
         const sql = `
             SELECT e.* FROM events e
             LEFT JOIN User_RSOs ur ON e.rso_id = ur.rso_id AND ur.user_id = $2
@@ -91,6 +101,23 @@ router.get("/search", async (req, res) => {
     } catch (err) {
         console.error("Error searching events: ", err);
         res.status(500).json({ message: "Server error", details: err.message });
+    }
+});
+
+router.get('/allowed/', async (req, res) => {
+    const { userId } = req.query;
+    try {
+        const events = await pool.query(`
+            SELECT e.* FROM Events e
+            LEFT JOIN RSOs r ON e.rso_id = r.rso_id
+            WHERE e.visibility = 'public'
+            OR (e.visibility = 'private' AND e.university_id = (SELECT university_id FROM Users WHERE user_id = $1))
+            OR (e.visibility = 'rso' AND e.rso_id IN (SELECT rso_id FROM User_RSOs WHERE user_id = $1) AND r.is_active)
+        `, [userId]);
+        res.json(events.rows);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: "Server error" });
     }
 });
 

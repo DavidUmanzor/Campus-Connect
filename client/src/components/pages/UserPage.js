@@ -9,7 +9,7 @@ const UserPage = () => {
     const [universityName, setUniversityName] = useState('');
     const [userRsos, setUserRsos] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [modalType, setModalType] = useState(''); // Only 'email' is used now
+    const [modalType, setModalType] = useState('');
     const [newEmail, setNewEmail] = useState('');
     const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
     const [oldPassword, setOldPassword] = useState('');
@@ -74,7 +74,6 @@ const UserPage = () => {
             });
             if (!response.ok) throw new Error('Failed to update user');
             setShowModal(false);
-            // Optionally refetch user data here
         } catch (error) {
             console.error('Error:', error);
         }

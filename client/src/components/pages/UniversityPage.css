@@ -4,8 +4,11 @@
 }
 
 .university-page img {
-    max-height: 300px;
+    max-height: 400px;
     object-fit: cover;
 }
 
-/* Add more styles as needed */
+.university-page .card {
+    margin-bottom: 20px;;
+}
+

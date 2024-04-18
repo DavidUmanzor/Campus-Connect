@@ -38,7 +38,6 @@ const EditEvent = ({ show, onHide, onSave, event }) => {
         longitude: 0,
     });
 
-    // Load event data when the component mounts or the event prop changes
     useEffect(() => {
         if (event) {
             setEventData({

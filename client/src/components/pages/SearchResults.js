@@ -7,21 +7,22 @@ import Navigation from '../Navigation';
 const fetchData = async (query, userId) => {
     const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
-    // Fetch data for universities, RSOs, and events separately
     try {
-        const universityPromise = fetch(`${baseUrl}/universities/search?query=${encodeURIComponent(query)}`);
-        const rsoPromise = fetch(`${baseUrl}/rsos/search?query=${encodeURIComponent(query)}`);
-        const eventPromise = fetch(`${baseUrl}/events/search?query=${encodeURIComponent(query)}&userId=${userId}`);
 
-        // Resolve all promises
+        const searchEndpoint = query ? `/search?query=${encodeURIComponent(query)}` : '/all';
+
+        const universityPromise = fetch(`${baseUrl}/universities${searchEndpoint}`);
+        const rsoPromise = fetch(`${baseUrl}/rsos${searchEndpoint}`);
+
+        const eventEndpoint = query ? searchEndpoint : `/events/allowed?userId=${userId}`;
+        const eventPromise = fetch(`${baseUrl}${eventEndpoint}`);
+
         const [universitiesResponse, rsosResponse, eventsResponse] = await Promise.all([universityPromise, rsoPromise, eventPromise]);
 
-        // Check for response ok status
         if (!universitiesResponse.ok || !rsosResponse.ok || !eventsResponse.ok) {
             throw new Error('One or more requests failed');
         }
 
-        // Parse JSON from each response
         const universitiesData = await universitiesResponse.json();
         const rsosData = await rsosResponse.json();
         const eventsData = await eventsResponse.json();
@@ -42,17 +43,20 @@ const SearchResults = () => {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState(new URLSearchParams(location.search).get('query') || '');
     const [results, setResults] = useState({ universities: [], rsos: [], events: [] });
-    const userId = localStorage.getItem('userId'); // Retrieve the logged-in user's ID if available
+    const userId = localStorage.getItem('userId');
 
     useEffect(() => {
         if (searchQuery) {
-            fetchData(searchQuery, userId).then(data => setResults(data));
+            fetchData('', userId).then(data => setResults(data));
         }
-    }, [searchQuery, userId]);
+    }, [userId]);
 
     const handleSearchInputChange = e => setSearchQuery(e.target.value);
 
-    const handleSearch = () => navigate(`/searchresults?query=${encodeURIComponent(searchQuery)}`);
+    const handleSearch = () => {
+    navigate(`/searchresults?query=${encodeURIComponent(searchQuery)}`);
+    fetchData(searchQuery, userId).then(data => setResults(data));
+};
 
     const handleKeyPress = e => {
         if (e.key === 'Enter') {

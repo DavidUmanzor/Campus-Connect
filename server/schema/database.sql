@@ -9,7 +9,7 @@ CREATE TABLE Universities (
   description TEXT,
   number_of_students INT,
   pictures TEXT[], -- Array of image URLs
-  email_domain VARCHAR(255) UNIQUE -- Removed semicolon, added comma
+  email_domain VARCHAR(255) UNIQUE
 );
 
 CREATE TABLE Users (
@@ -19,7 +19,7 @@ CREATE TABLE Users (
   password VARCHAR(255) NOT NULL,
   role VARCHAR(50) CHECK (role IN ('student', 'admin', 'superAdmin')),
   university_id INT,
-  FOREIGN KEY (university_id) REFERENCES Universities(university_id) -- Added ON DELETE SET NULL if needed
+  FOREIGN KEY (university_id) REFERENCES Universities(university_id)
 );
 
 CREATE TABLE RSOs (
@@ -28,9 +28,9 @@ CREATE TABLE RSOs (
   description TEXT,
   admin_id INT,
   university_id INT,
-  is_active BOOLEAN DEFAULT FALSE, -- Moved up to correct the syntax error
+  is_active BOOLEAN DEFAULT FALSE,
   FOREIGN KEY (admin_id) REFERENCES Users(user_id),
-  FOREIGN KEY (university_id) REFERENCES Universities(university_id) -- Corrected the comma issue
+  FOREIGN KEY (university_id) REFERENCES Universities(university_id)
 );
 
 CREATE TABLE Events (
@@ -51,7 +51,7 @@ CREATE TABLE Events (
   rso_id INT,
   FOREIGN KEY (created_by) REFERENCES Users(user_id),
   FOREIGN KEY (university_id) REFERENCES Universities(university_id),
-  FOREIGN KEY (rso_id) REFERENCES RSOs(rso_id) -- Removed semicolon at the end
+  FOREIGN KEY (rso_id) REFERENCES RSOs(rso_id)
 );
 
 CREATE TABLE CommentsRatings (
@@ -73,11 +73,10 @@ CREATE TABLE User_RSOs (
   FOREIGN KEY (rso_id) REFERENCES RSOs(rso_id) ON DELETE CASCADE
 );
 
--- The function and triggers remain unchanged
 CREATE OR REPLACE FUNCTION update_rso_status()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- Update logic remains the same
+
 END;
 $$ LANGUAGE plpgsql;
 

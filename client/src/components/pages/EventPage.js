@@ -9,7 +9,6 @@ import './EventPage.css';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import EditEvent from '../forms/EditEvent';
 
-// Update the icons if they are not displaying properly
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
@@ -56,7 +55,7 @@ const EventPage = () => {
                 if (commentsResponse.ok) {
                     const commentsData = await commentsResponse.json();
                     console.log(commentsData);
-                    setComments(commentsData);
+                    setComments(Array.isArray(commentsData) ? commentsData : []);
                 }
             }
         };
@@ -114,10 +113,15 @@ const EventPage = () => {
             body: JSON.stringify({ ...editingFormData, user_id: userId, event_id: eventId }),
         });
         if (response.ok) {
-            // Refresh comments or update state directly
-            const updatedComments = await response.json();
-            setComments(updatedComments);
-            setEditingCommentId(null); // Reset editing state
+            const updatedComment = await response.json();
+            setComments(comments.map(comment =>
+                comment.comment_id === editingCommentId ? { ...comment, ...updatedComment } : comment
+            ));
+            setEditingCommentId(null);
+        } else {
+            console.error('Failed to update comment');
+            const errorData = await response.text();
+            alert(`Could not update comment: ${errorData}`);
         }
     };
 
@@ -155,9 +159,8 @@ const EventPage = () => {
                             universityId={universityId}
                             event={eventDetails}
                             onEventCreated={() => {
-                                // Add logic here for what happens after an event is created
                                 console.log('Event Created! Fetching new list...');
-                                setShowEditEventModal(false); // Hide modal after creation
+                                setShowEditEventModal(false);
                             }}
                         />
                 </Card.Body>

@@ -7,13 +7,13 @@ import './Login.css';
 const Login = ({ onSignUpClick, onClose }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState(''); // Add this line
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setErrorMessage(''); // Reset error message
+    setErrorMessage('');
     try {
         const response = await fetch(`${API_URL}/api/login`, {
             method: 'POST',
@@ -30,15 +30,15 @@ const Login = ({ onSignUpClick, onClose }) => {
                 localStorage.setItem('userId', responseData.user_id.toString());
                 navigate('/mainpage');
             } else {
-                setErrorMessage("User ID not found in response"); // Handle no user_id found
+                setErrorMessage("User ID not found in response");
             }
         } else {
             // If login is not successful, display the error message
-            setErrorMessage(responseData.message || 'Login failed. Please try again.'); // Update here to display message
+            setErrorMessage(responseData.message || 'Login failed. Please try again.');
         }
     } catch (error) {
       console.error(error);
-      setErrorMessage('An unexpected error occurred. Please try again.'); // Handle unexpected error
+      setErrorMessage('An unexpected error occurred. Please try again.');
     }
   };
 
@@ -47,7 +47,7 @@ const Login = ({ onSignUpClick, onClose }) => {
       <div className="login-panel">
         <button className="close-button" onClick={onClose}>X</button>
         <h2>Login</h2>
-        {errorMessage && <div className="error-message">{errorMessage}</div>} {/* Display the error message here */}
+        {errorMessage && <div className="error-message">{errorMessage}</div>}
         <form onSubmit={handleLogin}>
           <input 
             type="text"

@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Modal } from 'react-bootstrap';
 import './RsoPage.css';
 import Navigation from '../Navigation';
+import CreateEvent from '../forms/CreateEvent';
 
 const RsoPage = () => {
     const { rsoId } = useParams();
@@ -15,6 +16,8 @@ const RsoPage = () => {
     const [newAdminEmail, setNewAdminEmail] = useState('');
     const [newAdminName, setNewAdminName] = useState('');    
     const [errorMessage, setErrorMessage] = useState('');
+    const [showCreateEventModal, setShowCreateEventModal] = useState(false);
+    const [universityId, setUniversityId] = useState({});
     const navigate = useNavigate();
     const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
     const userId = localStorage.getItem('userId');
@@ -26,12 +29,20 @@ const RsoPage = () => {
                 const rsoData = await rsoResponse.json();
                 setRsoDetails(rsoData);
             }
+            setUniversityId(rsoDetails.university_id);
 
-            // New: Fetch RSO status
+            if (isRsoActive) {
+                const eventsResponse = await fetch(`${API_URL}/events/rso/${rsoId}`);
+                if (eventsResponse.ok) {
+                    const eventsData = await eventsResponse.json();
+                    setEvents(eventsData.filter(event => event.visibility === 'public' || isMember));
+                }
+            }
+
             const activeResponse = await fetch(`${API_URL}/rsos/status/${rsoId}`);
             if (activeResponse.ok) {
                 const data = await activeResponse.json();
-                setIsRsoActive(data); // This field should come from your API
+                setIsRsoActive(data);
                 console.log(data);
             }
 
@@ -45,16 +56,6 @@ const RsoPage = () => {
                 setIsMember(membershipData.isMember);
             }
 
-            // Fetch events only if the RSO is active
-            if (isRsoActive) {
-                const eventsResponse = await fetch(`${API_URL}/events/rso/${rsoId}`);
-                if (eventsResponse.ok) {
-                    const eventsData = await eventsResponse.json();
-                    setEvents(eventsData.filter(event => event.visibility === 'public' || isMember));
-                }
-            }
-
-            // New: Fetch admin status
             const adminResponse = await fetch(`${API_URL}/rsos/admin/${rsoId}?userId=${userId}`);
             if (adminResponse.ok) {
                 const adminData = await adminResponse.json();
@@ -64,6 +65,16 @@ const RsoPage = () => {
 
         fetchData();
     }, [API_URL, rsoId, userId, isMember]);
+
+    const fetchEvents = async () => {
+        if (isRsoActive) {
+            const eventsResponse = await fetch(`${API_URL}/events/rso/${rsoId}`);
+            if (eventsResponse.ok) {
+                const eventsData = await eventsResponse.json();
+                setEvents(eventsData.filter(event => event.visibility === 'public' || isMember));
+            }
+        }
+    };
 
     const handleJoinRso = async () => {
         await fetch(`${API_URL}/userRsos/add`, {
@@ -79,8 +90,12 @@ const RsoPage = () => {
         if (!isRsoActive) {
             alert("RSO is not active. RSO requires more people to be an actively registered RSO.");
         } else {
-            navigate(`/createEvent/${rsoId}`);
+            setShowCreateEventModal(!showCreateEventModal);
         }
+    };
+
+    const handleToggleEventModal = () => {
+        setShowCreateEventModal(!showCreateEventModal);
     };
 
     const handleLeaveRso = async () => {
@@ -103,13 +118,12 @@ const RsoPage = () => {
                 body: JSON.stringify({ email: newAdminEmail, rsoId })
             });
     
-            const data = await response.json(); // Attempt to parse JSON regardless of response status
+            const data = await response.json();
     
             if (response.ok) {
                 setNewAdminName(data.name);
                 setErrorMessage('');
             } else {
-                // Handle different error statuses appropriately
                 setErrorMessage(data.message);
                 setNewAdminName('');
             }
@@ -144,10 +158,9 @@ const RsoPage = () => {
         const activeResponse = await fetch(`${API_URL}/rsos/status/${rsoId}`);
         if (activeResponse.ok) {
             const data = await activeResponse.json();
-            setIsRsoActive(data.is_active); // This field should come from your API
+            setIsRsoActive(data.is_active);
         }
 
-        // Fetch events only if the RSO is active
         if (isRsoActive) {
             const eventsResponse = await fetch(`${API_URL}/events/rso/${rsoId}`);
             if (eventsResponse.ok) {
@@ -232,6 +245,13 @@ const RsoPage = () => {
                 </Row>
                 <Row>
                     <Col>
+                    <CreateEvent
+                        show={showCreateEventModal}
+                        onHide={handleToggleEventModal}
+                        universityId={universityId}
+                        rsoId={rsoId}
+                        onEventCreated={fetchEvents}  // Pass the fetchEvents function as a prop
+                    />
                     <h3>Events</h3>
                     {events.length ? (
                         events.map((event, index) => (

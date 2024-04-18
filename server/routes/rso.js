@@ -2,17 +2,43 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db'); // Assuming you have a db.js file for database connection
 
-// Create RSO
+// Create RSO and add maker as member
 router.post('/create', async (req, res) => {
     const { name, description, admin_id, university_id } = req.body;
+
     try {
+        // Start a transaction
+        await pool.query('BEGIN');
+
+        // Insert the new RSO
         const newRso = await pool.query(
             'INSERT INTO rsos (name, description, admin_id, university_id) VALUES ($1, $2, $3, $4) RETURNING *',
             [name, description, admin_id, university_id]
         );
-        res.json(newRso.rows[0]);
+
+        if (newRso.rows.length > 0) {
+            const rso_id = newRso.rows[0].rso_id;
+
+            // Insert the creator as a member of the RSO
+            const userRso = await pool.query(
+                'INSERT INTO User_RSOs (user_id, rso_id) VALUES ($1, $2) RETURNING *',
+                [admin_id, rso_id]
+            );
+
+            // Commit the transaction
+            await pool.query('COMMIT');
+
+            res.json({ rso: newRso.rows[0], membership: userRso.rows[0] });
+        } else {
+            // Rollback in case of any failure
+            await pool.query('ROLLBACK');
+            res.status(400).json({ message: "Failed to create RSO" });
+        }
     } catch (err) {
+        // Rollback the transaction on error
+        await pool.query('ROLLBACK');
         console.error(err.message);
+        res.status(500).json({ message: "Server error" });
     }
 });
 
@@ -42,6 +68,47 @@ router.get("/search", async (req, res) => {
     }
 });
 
+router.post('/check-new-admin', async (req, res) => {
+    const { email, rsoId } = req.body;
+    try {
+        const userQuery = await pool.query(
+            "SELECT u.user_id, u.name, u.university_id, (SELECT admin_id FROM RSOs WHERE rso_id = $1) AS current_admin_id FROM users u WHERE u.email = $2",
+            [rsoId, email]
+        );
+
+        if (userQuery.rows.length === 0) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        const user = userQuery.rows[0];
+
+        // Check if the user is at the same university as the RSO
+        const rsoQuery = await pool.query(
+            "SELECT university_id FROM RSOs WHERE rso_id = $1",
+            [rsoId]
+        );
+
+        if (rsoQuery.rows[0].university_id !== user.university_id) {
+            return res.status(400).json({ message: "User is not at the same university." });
+        }
+
+        // Check if the user is already an admin of any RSO
+        const adminCheck = await pool.query(
+            "SELECT 1 FROM RSOs WHERE admin_id = $1",
+            [user.user_id]
+        );
+
+        if (adminCheck.rows.length > 0) {
+            return res.status(400).json({ message: "This user is already an admin of an RSO." });
+        }
+
+        res.json({ eligible: true, name: user.name });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
 // Get if RSO is active or not
 router.get("/status/:id", async (req, res) => {
     try {
@@ -53,28 +120,6 @@ router.get("/status/:id", async (req, res) => {
         res.json(statusResults.rows);
     } catch (err) {
         console.error(err.message);
-        res.status(500).json({ message: "Server error" });
-    }
-});
-
-router.get('/:rsoId', async (req, res) => {
-    const { rsoId } = req.params;
-    try {
-        const rsoDetails = await pool.query(`
-            SELECT r.*, COUNT(ur.user_id) AS member_count, r.is_active
-            FROM RSOs r
-            LEFT JOIN User_RSOs ur ON r.rso_id = ur.rso_id
-            WHERE r.rso_id = $1
-            GROUP BY r.rso_id
-        `, [rsoId]);
-
-        if (rsoDetails.rows.length === 0) {
-            return res.status(404).json({ message: "RSO not found." });
-        }
-
-        res.json(rsoDetails.rows[0]);
-    } catch (error) {
-        console.error(error);
         res.status(500).json({ message: "Server error" });
     }
 });
@@ -146,67 +191,7 @@ router.put('/update-admin/:id', async (req, res) => {
     }
 });
 
-router.post('/check-new-admin', async (req, res) => {
-    const { email, rsoId } = req.body;
-    try {
-        const userQuery = await pool.query(
-            "SELECT u.user_id, u.name, u.university_id, (SELECT admin_id FROM RSOs WHERE rso_id = $1) AS current_admin_id FROM users u WHERE u.email = $2",
-            [rsoId, email]
-        );
 
-        if (userQuery.rows.length === 0) {
-            return res.status(404).json({ message: "User not found." });
-        }
-
-        const user = userQuery.rows[0];
-
-        // Check if the user is at the same university as the RSO
-        const rsoQuery = await pool.query(
-            "SELECT university_id FROM RSOs WHERE rso_id = $1",
-            [rsoId]
-        );
-
-        if (rsoQuery.rows[0].university_id !== user.university_id) {
-            return res.status(400).json({ message: "User is not at the same university." });
-        }
-
-        // Check if the user is already an admin of any RSO
-        const adminCheck = await pool.query(
-            "SELECT 1 FROM RSOs WHERE admin_id = $1",
-            [user.user_id]
-        );
-
-        if (adminCheck.rows.length > 0) {
-            return res.status(400).json({ message: "This user is already an admin of an RSO." });
-        }
-
-        res.json({ eligible: true, name: user.name });
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: "Server error" });
-    }
-});
-
-// Endpoint to transfer RSO admin role
-router.post('/transfer-admin', async (req, res) => {
-    const { rsoId, oldAdminId, newAdminId } = req.body;
-    try {
-        // Update RSO with new admin ID
-        await pool.query(
-            "UPDATE RSOs SET admin_id = $1 WHERE rso_id = $2",
-            [newAdminId, rsoId]
-        );
-
-        // Update user roles
-        await pool.query("UPDATE users SET role = 'student' WHERE user_id = $1", [oldAdminId]);
-        await pool.query("UPDATE users SET role = 'admin' WHERE user_id = $1", [newAdminId]);
-
-        res.json({ message: "Admin role transferred successfully." });
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: "Server error" });
-    }
-});
 
 // Delete RSO
 router.delete('/delete/:id', async (req, res) => {
@@ -216,6 +201,28 @@ router.delete('/delete/:id', async (req, res) => {
         res.json('RSO was deleted');
     } catch (err) {
         console.error(err.message);
+    }
+});
+
+router.get('/:rsoId', async (req, res) => {
+    const { rsoId } = req.params;
+    try {
+        const rsoDetails = await pool.query(`
+            SELECT r.*, COUNT(ur.user_id) AS member_count, r.is_active
+            FROM RSOs r
+            LEFT JOIN User_RSOs ur ON r.rso_id = ur.rso_id
+            WHERE r.rso_id = $1
+            GROUP BY r.rso_id
+        `, [rsoId]);
+
+        if (rsoDetails.rows.length === 0) {
+            return res.status(404).json({ message: "RSO not found." });
+        }
+
+        res.json(rsoDetails.rows[0]);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
     }
 });
 

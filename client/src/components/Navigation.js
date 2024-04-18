@@ -8,8 +8,8 @@ const Navigation = () => {
     const navigate = useNavigate();
 
     const handleLogout = () => {
-        localStorage.removeItem('userId'); // Adjust this if you're using a different method to store the user session
-        navigate('/'); // Redirect to the homepage or login page
+        localStorage.removeItem('userId');
+        navigate('/');
     };
 
     return (
@@ -22,7 +22,7 @@ const Navigation = () => {
                         <Link to="/mainpage" className="nav-link">Home</Link>
                         <Link to="/user" className="nav-link">User Profile</Link>
                         <Link to="/searchresults" className="nav-link">Search</Link>
-                        {/* Add more links as needed */}
+                        {/* more links */}
                     </Nav>
                     <Button variant="danger" onClick={handleLogout}>Log Out</Button>
                 </Navbar.Collapse>

@@ -10,7 +10,7 @@ const CreateUniversity = ({ show, onHide, emailDomain, onUniversityCreated }) =>
         description: '',
         numberOfStudents: '',
         pictures: [],
-        emailDomain: emailDomain // Pre-populated from the signup flow
+        emailDomain: emailDomain
     });
 
     const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';

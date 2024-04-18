@@ -29,11 +29,6 @@
 	top: auto;
 }
 
-.image-display image-caption {
-	justify-content: center;
-	bottom: 0%;
-}
-
 .dashboard-image {
 	width: 100%;
 	height: auto;
@@ -50,8 +45,8 @@
 }
 
 .image-caption {
-	position: absolute;
-	bottom: 35%;
+	position: relative;
+	bottom: 100%;
 	left: 10%;
 	font-size: 1.5em;
 	color: white;

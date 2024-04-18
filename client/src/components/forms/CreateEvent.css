@@ -20,7 +20,6 @@
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
-/* Adjust the icons within the time picker for a cleaner look */
 .react-time-picker__button {
   color: #495057;
   min-width: 2rem;
@@ -34,7 +33,7 @@
   }
 
 .timePicker input {
-min-width: 70px; /* Adjust the width of the input fields */
-padding: 5px; /* Add more padding inside the inputs */
-margin: 0 2px; /* Add space between the inputs */
+min-width: 70px;
+padding: 5px;
+margin: 0 2px;
 }

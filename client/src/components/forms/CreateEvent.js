@@ -25,7 +25,7 @@ const LocationPicker = ({ onLocationSelected }) => {
     return null;
 };
 
-const CreateEvent = ({ show, onHide, universityId, onEventCreated }) => {
+const CreateEvent = ({ show, onHide, universityId, rsoId, onEventCreated }) => {
     const [eventLocation, setEventLocation] = useState(null);
     const [eventData, setEventData] = useState({
         name: '',
@@ -38,9 +38,9 @@ const CreateEvent = ({ show, onHide, universityId, onEventCreated }) => {
         contact_email: '',
         visibility: 'public',
     });
-    const [eventTime, setEventTime] = useState('10:00'); // initial time
+    const [eventTime, setEventTime] = useState('10:00');
     const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-    const userId = localStorage.getItem('userId'); // Assuming this is the ID of the user creating the event
+    const userId = localStorage.getItem('userId');
 
     const handleEventChange = (e) => {
         const { name, value } = e.target;
@@ -58,11 +58,11 @@ const CreateEvent = ({ show, onHide, universityId, onEventCreated }) => {
             const response = await fetch(`${API_URL}/events/create`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...eventData, event_time: eventTime, created_by: userId, university_id: universityId }),
+                body: JSON.stringify({ ...eventData, event_time: eventTime, created_by: userId, university_id: universityId, rso_id: rsoId}),
             });
             if (response.ok) {
                 onEventCreated();
-                onHide(); // Close modal on successful creation
+                onHide();
             } else {
                 throw new Error('Failed to create event');
             }
@@ -186,7 +186,7 @@ const CreateEvent = ({ show, onHide, universityId, onEventCreated }) => {
                     <Form.Group className="mb-3">
                         <Form.Label>Event Location</Form.Label>
                         <MapContainer
-                            center={[28.6024, -81.2001]} // Example center for UCF
+                            center={[28.6024, -81.2001]}
                             zoom={13}
                             style={{ height: '180px', marginBottom: '20px' }}
                         >

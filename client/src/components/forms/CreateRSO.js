@@ -14,22 +14,37 @@ const CreateRSO = ({ show, onHide, universityId, onRsoCreated }) => {
     const handleSubmitRso = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch(`${API_URL}/rsos/create`, {
+            const createResponse = await fetch(`${API_URL}/rsos/create`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...rsoData, admin_id: userId, university_id: universityId })
             });
-            if (response.ok) {
-                onRsoCreated();
-                onHide(); // Close modal on successful creation
+    
+            if (createResponse.ok) {
+                const rso = await createResponse.json();
+                // Once the RSO is created, update the user's role to 'admin'
+                const updateRoleResponse = await fetch(`${API_URL}/users/updateRole`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, role: 'admin' })
+                });
+    
+                if (updateRoleResponse.ok) {
+                    onRsoCreated();
+                    onHide();
+                } else {
+                    
+                    throw new Error('RSO created, but failed to update user role to admin.');
+                }
             } else {
+               
                 throw new Error('Failed to create RSO');
             }
         } catch (error) {
-            console.error('Error creating RSO:', error);
+            console.error('Error creating RSO or updating role:', error);
+            alert(error.message);
         }
     };
-
     return (
         <Modal show={show} onHide={onHide} centered>
             <Modal.Header closeButton>
