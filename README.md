@@ -1,4 +1,4 @@
-# Campus-Connect-360
+# Campus-Connect
 
 ## Current Version: 0.0.0
 
