@@ -1,0 +1,25 @@
+/* SearchResults.css */
+
+.search-results-container {
+    padding: 20px;
+  }
+  
+  .search-bar-row {
+    margin-bottom: 20px;
+  }
+  
+  .results-row {
+    margin-bottom: 20px;
+  }
+  
+  .result-item {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 10px;
+  }
+  
+  .add-new-row {
+    text-align: center;
+    margin-top: 30px;
+  }
+  

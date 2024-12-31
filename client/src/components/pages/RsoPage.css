@@ -1,0 +1,10 @@
+.rso-page {
+	background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+	--bs-gutter-x: 0;
+
+	align-items: center;
+	padding: 0;
+}

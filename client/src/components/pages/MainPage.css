@@ -1,0 +1,59 @@
+/* MainPage.css */
+
+  .main-page-container {
+    padding: 0;
+    margin: 0;
+  }
+  
+  .main-navbar {
+    margin-bottom: 20px;
+  }
+  
+  .search-row {
+    margin-bottom: 20px;
+  }
+  
+  .search-col {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .search-input {
+    flex-grow: 1;
+    margin-right: 10px;
+  }
+  
+  .image-row {
+    position: relative;
+    text-align: center;
+  }
+  
+  .campus-image {
+    width: 100%;
+    height: auto;
+  }
+  
+  .image-container img {
+    width: 100%;
+    max-height: 500px;
+    object-fit: cover;
+    display: block;
+  }
+  
+  .image-container {
+    position: relative;
+    text-align: center;
+  }
+  
+  .image-caption {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  

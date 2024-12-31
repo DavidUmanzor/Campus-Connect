@@ -1,0 +1,14 @@
+.university-page .card-header {
+    background-color: #0056b3;
+    color: white;
+}
+
+.university-page img {
+    max-height: 400px;
+    object-fit: cover;
+}
+
+.university-page .card {
+    margin-bottom: 20px;;
+}
+

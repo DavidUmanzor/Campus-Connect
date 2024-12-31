@@ -12,7 +12,7 @@ router.post('/', async (req, res) => {
 
         if (user.rows.length > 0) {
             // Compare hashed password from the database with the provided password
-            const isValidPassword = await password.toLowerCase() == user.rows[0].password.toLowerCase();
+            const isValidPassword = await bcrypt.compare(password, user.rows[0].password);
             if (isValidPassword) {
                 // Passwords match
                 // You can add token creation or session handling here if needed
