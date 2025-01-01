@@ -6,26 +6,29 @@ const cors = require("cors");
 const PORT = process.env.SERVER_PORT || 5000;
 
 // Import route handlers
-const userRoutes = require('./routes/user');
-const universityRoutes = require('./routes/university');
-const rsosRoutes = require('./routes/rso');
-const eventsRoutes = require('./routes/event');
-const commentsratingsRoutes = require('./routes/commentsratings');
-const loginRoutes = require('./routes/login');
+const userRoutes = require("./routes/user");
+const universityRoutes = require("./routes/university");
+const rsosRoutes = require("./routes/rso");
+const eventsRoutes = require("./routes/event");
+const commentsratingsRoutes = require("./routes/commentsratings");
+const loginRoutes = require("./routes/login");
+const userRsoRoutes = require("./routes/userRso");
+const signUpRoutes = require("./routes/signup");
 
 //middleware
 app.use(cors());
 app.use(express.json());
 
 //ROUTES//
-app.use('/api/users', userRoutes);
-app.use('/api/universities', universityRoutes);
-app.use('/api/rsos', rsosRoutes);
-app.use('/api/events', eventsRoutes);
-app.use('/api/commentsratings', commentsratingsRoutes);
-app.use('/api/login', loginRoutes);
-
+app.use("/api/users", userRoutes);
+app.use("/api/universities", universityRoutes);
+app.use("/api/rsos", rsosRoutes);
+app.use("/api/events", eventsRoutes);
+app.use("/api/commentsratings", commentsratingsRoutes);
+app.use("/api/login", loginRoutes);
+app.use("/api/userRsos", userRsoRoutes);
+app.use("/api/signUp", signUpRoutes);
 
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+	console.log(`Server running on port ${PORT}`);
 });

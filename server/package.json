@@ -1,19 +1,22 @@
 {
-  "name": "server",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "David Umanzor",
-  "license": "ISC",
-  "dependencies": {
-    "bcrypt": "^5.1.1",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.3",
-    "express": "^4.18.2",
-    "nodemon": "^3.0.3",
-    "pg": "^8.11.3"
-  }
+	"name": "server",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"setup-db": "node scripts/setupDatabase.js",
+		"seed-db": "node scripts/populateDummyData.js",
+		"reset-db": "npm run setup-db && npm run seed-db",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "David Umanzor",
+	"license": "ISC",
+	"dependencies": {
+		"bcrypt": "^5.1.1",
+		"cors": "^2.8.5",
+		"dotenv": "^16.4.3",
+		"express": "^4.18.2",
+		"nodemon": "^3.0.3",
+		"pg": "^8.11.3"
+	}
 }
